@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib as plot
 import numpy.random as rnd
+import argparse
 from ActiveAgent import ActiveAgent
 from matplotlib import pyplot as plt
 from matplotlib import animation
@@ -70,12 +71,24 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float): #funzione de
 
 
 def main():
-	n_snaps=500
-	n_agenti=30
-	T=0.02
-	v0=4.0
-	linear_density=1
-	eta_random=0.4
+	#parser per inserire la configurazione da linea di comando
+	parser_args=argparse.ArgumentParser(description="Programma per la simulazione di un modello Vicsek", prog="Vicsek Sim")
+	parser_args.add_argument("n_agenti", help="Numero di agenti attivi nella simulazione")
+	parser_args.add_argument("n_snaps", help="Numero di snapshot dello stato del sistema")
+	parser_args.add_argument("T_sim", help="Passo di simulazione")
+	parser_args.add_argument("v_agenti", help="Modulo della velocità di ogni agente")
+	parser_args.add_argument("densita_lineare", help="Densità degli agenti lungo gli assi del sistema di riferimento")
+	parser_args.add_argument("eta_random", help="Intensità del rumore")
+	parser_args.add_argument("R0", help="Raggio dell'intorno degli agenti")
+	argsCmd=parser_args.parse_args()
+	
+	T=float(argsCmd.T_sim)
+	linear_density=float(argsCmd.densita_lineare)
+	v0=float(argsCmd.v_agenti)
+	n_agenti=int(argsCmd.n_agenti)
+	eta_random=float(argsCmd.eta_random)
+	n_snaps=int(argsCmd.n_snaps)
+	ActiveAgent.raggioIntorno=float(argsCmd.R0)
 	
 	simulazione=Vicsek(T, linear_density, v0, n_agenti, eta_random)
 	istanti=simulazione(n_snaps)

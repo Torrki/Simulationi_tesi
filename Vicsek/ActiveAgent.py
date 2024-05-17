@@ -14,7 +14,7 @@ class ActiveAgent:
 	|  s  |
 	|_____|
 	'''
-	raggioIntorno=3
+	#raggioIntorno=5
 	def __init__(self, r0, s0):
 		self.stato=np.concatenate((r0,s0), dtype=np.dtype(float))
 	
