@@ -1,9 +1,6 @@
 import numpy as np
 
-class ArtificialAnt:
-	Q=1
-	V=7
-	
+class ArtificialAnt:	
 	def __init__(self, startNode):
 		self.Percorso=list()
 		self.Posizione=np.copy(startNode.posizione)
@@ -15,3 +12,4 @@ class ArtificialAnt:
 	def AppendArc(self, arc):
 		self.Percorso.append(arc)
 		self.CostoPercorso += arc.Costo
+		

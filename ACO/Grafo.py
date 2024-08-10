@@ -46,8 +46,10 @@ class NodoGrafo:
 		return np.linalg.norm(distanza) < 2e-1
 			
 class Grafo:
-	def __init__(self, tau_0, rho, nodi):
+	def __init__(self, tau_0, rho, nodi, Ni, Nc):
 		self.Nodi=nodi
+		self.Nido=Ni
+		self.NodoCibo=Nc
 		self.Tau0=tau_0
 		self.Rho=rho
 			
@@ -63,5 +65,4 @@ class Grafo:
 				if a not in archiAggiornati:
 					a.Update()
 					archiAggiornati=archiAggiornati.union({a})
-			
-		
+
