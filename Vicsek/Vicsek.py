@@ -2,7 +2,7 @@ import numpy as np
 import numpy.random as rnd
 from ActiveAgent import ActiveAgent
 
-def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, R0: int): #funzione decoratore per configurare la simulazione
+def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int): #funzione wrapper per configurare la simulazione
 	'''
 	Funzione per la configurazione di un modello Vicsek:
 	T 					è il periodo di osservazione
@@ -11,6 +11,8 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 	N						è il numero di agenti attivi
 	eta					è l'intensità del rumore
 	beta				è l'intensità della forza di attrazione-repulsione
+	R0					è il raggio che definisce l'intorno degli agenti
+	Dattr				è la distanza minima tra gli agenti nella forza di attrazione
 	
 	torna una funzione che permette di eseguire la simulazione
 	'''
@@ -54,7 +56,7 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 					if(normaDistanza >= 1.0):
 						dist_ij=dist_ij/normaDistanza
 					
-					s_vicini += connettivita[j,i]*agenti[j].getDirection() + connettivita[j,i]*beta*pow( (int(normaDistanza) - (R0-2)), 3)*dist_ij
+					s_vicini += connettivita[j,i]*agenti[j].getDirection() + connettivita[j,i]*beta*pow( (int(normaDistanza) - Dattr), 3)*dist_ij
 					
 				rumore=gen.standard_normal(size=(2,1))
 				rumore_norm = rumore/np.linalg.norm(rumore)

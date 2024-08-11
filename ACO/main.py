@@ -1,4 +1,5 @@
 import argparse
+import itertools
 from matplotlib import pyplot as plt
 from matplotlib import animation
 from Grafo import *
@@ -33,7 +34,7 @@ def main():
 	Nido=Nodi[0]
 	NodoCibo=Nodi[-1]
 
-	G=Grafo(rho, tau0, set(Nodi), Nido, NodoCibo)
+	G=Grafo(tau0, rho, set(Nodi), Nido, NodoCibo)
 	G.LinkNodes(Nido, Nodi[1],1)
 	G.LinkNodes(Nodi[1], Nodi[2],1)
 	G.LinkNodes(Nodi[2], Nodi[3],1)
@@ -55,35 +56,83 @@ def main():
 	G.LinkNodes(Nodi[11], Nodi[14],1)
 	
 	simulazione=ACO(n_agenti, n_snaps, T_sim, freq_spawn, v0, rho, tau0, Q, G)
-	istanti=simulazione(n_snaps)
+	(istanti, ferormoni)=simulazione(n_snaps)
+	istanti = np.transpose(istanti)
+	ferormoni=np.transpose(ferormoni)
 
 	#Animazione
-	fig, ax=plt.subplots()
-	points, =ax.plot([], [],'bo')
+	fig, (axAn,axGr) =plt.subplots(nrows=2, ncols=1, figsize=(10,9))
+	numeroArchi=len(G.Arcs)
+	points, =axAn.plot([], [],'bo')
+	listaLinee=list()
+	listaFerormoni=list()
+	t_plt=list()
+	
+	for a in range(numeroArchi):
+		l, =axGr.plot([], [],lw=2)
+		listaLinee.append(l)
+		listaFerormoni.append(list())
+	
+	def init_plot():
+		X_min = min(coords, key=lambda t: t[0])[0]
+		X_max = max(coords, key=lambda t: t[0])[0]
 
-	def update_points(nframe):
+		Y_min = min(coords, key=lambda t: t[1])[1]
+		Y_max = max(coords, key=lambda t: t[1])[1]
+
+		L_x = 0.1 * (X_max-X_min)
+		L_y = 0.1 * (Y_max-Y_min)
+		axGr.set_xlim([0, 1])
+		axGr.set_ylim([0,0.5])
+		axAn.set_xlim([X_min-L_x,X_max+L_x])
+		axAn.set_ylim([Y_min-L_y,Y_max+L_y])
+		
+		del t_plt[:]		
+		for a in range(numeroArchi):
+			del listaFerormoni[a][:]
+			listaLinee[a].set_data(t_plt, listaFerormoni[a])
+			
+		return tuple(listaLinee)
+		
+
+	def update_figure(nframe):
+		t=nframe*T_sim
+		istanteAgenti=istanti[nframe]
+		datiFerormoni=ferormoni[nframe]
+		
 		x_plt=list()
 		y_plt=list()
 		
 		for i in range(n_agenti):
-			x_plt.append(istanti[i*2][nframe])
-			y_plt.append(istanti[i*2+1][nframe])
+			x_plt.append(istanteAgenti[i*2])
+			y_plt.append(istanteAgenti[i*2+1])
 			
-		points.set_data( np.array([ x_plt,
-																y_plt ]) )
-		return points,
-	X_min = min(coords, key=lambda t: t[0])[0]
-	X_max = max(coords, key=lambda t: t[0])[0]
+		t_plt.append(t)
+		f=datiFerormoni[0]
+		for a in range(numeroArchi):
+			listaFerormoni[a].append(datiFerormoni[a])
+			f = datiFerormoni[a] if datiFerormoni[a] > f else f
+																		
+		tmin, tmax = axGr.get_xlim()
+		fmin, fmax = axGr.get_ylim()
+		
+		if(t >= tmax):
+			tmax *= 2
+			axGr.set_xlim([tmin, tmax])
+			axGr.figure.canvas.draw()
+			
+		if(f >= fmax):
+			fmax *= 2
+			axGr.set_ylim([fmin, fmax])
+			axGr.figure.canvas.draw()
+							
+		points.set_data(x_plt, y_plt)
+		for a in range(numeroArchi):
+			listaLinee[a].set_data(t_plt, listaFerormoni[a])
+		
+		return [points] + listaLinee
 
-	Y_min = min(coords, key=lambda t: t[1])[1]
-	Y_max = max(coords, key=lambda t: t[1])[1]
-
-	L_x = 0.1 * (X_max-X_min)
-	L_y = 0.1 * (Y_max-Y_min)
-	ax.set_xlim([X_min-L_x,X_max+L_x])
-	ax.set_ylim([Y_min-L_y,Y_max+L_y])
-
-	anim=animation.FuncAnimation(fig, update_points, n_snaps, interval=T_sim*1000.0, blit=True)
+	anim=animation.FuncAnimation(fig, update_figure, frames=n_snaps, interval=T_sim*1000.0, init_func=init_plot)
 	plt.show()
 	
 if(__name__ == "__main__"):

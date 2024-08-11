@@ -1,6 +1,8 @@
 import numpy as np
 from numpy import random as rnd
 
+lowerBound=1e-6
+
 class ArcoGrafo:
 	def __init__(self, tau_0, rho, N1, N2, c):
 		self.Ferormoni=tau_0
@@ -12,7 +14,7 @@ class ArcoGrafo:
 		N2.LinkArco(self)
 		
 	def Update(self):
-		tmp=(1-self.TassoEvaporazione)*self.Ferormoni + self.RilascioFormiche
+		tmp=(1-self.TassoEvaporazione)*self.Ferormoni + self.RilascioFormiche + lowerBound
 		self.Ferormoni=tmp
 		self.RilascioFormiche=0
 		
@@ -52,6 +54,17 @@ class Grafo:
 		self.NodoCibo=Nc
 		self.Tau0=tau_0
 		self.Rho=rho
+	
+	@property
+	def Arcs(self):
+		archi=set()
+		
+		for n in self.Nodi:
+			for a in n.Archi:
+				if a not in archi:
+					archi=archi.union({a})
+		return archi
+			
 			
 	def LinkNodes(self, Ns, Ne, costo):
 		if Ns in self.Nodi and Ne in self.Nodi:

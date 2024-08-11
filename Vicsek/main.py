@@ -15,6 +15,7 @@ def main():
 	parser_args.add_argument("eta_random", help="Intensità del rumore")
 	parser_args.add_argument("beta_attr", help="Intensità della forza di attrazione")
 	parser_args.add_argument("R0", help="Raggio dell'intorno degli agenti")
+	parser_args.add_argument("D_attr", help="Distanza minima della forza di attrazione tra gli agenti")
 	argsCmd=parser_args.parse_args()
 	
 	T=float(argsCmd.T_sim)
@@ -25,8 +26,9 @@ def main():
 	beta_attr=float(argsCmd.beta_attr)
 	n_snaps=int(argsCmd.n_snaps)
 	R0=float(argsCmd.R0)
+	Dattr=float(argsCmd.D_attr)
 	
-	simulazione=Vicsek(T, linear_density, v0, n_agenti, eta_random, beta_attr, R0)
+	simulazione=Vicsek(T, linear_density, v0, n_agenti, eta_random, beta_attr, R0, Dattr)
 	istanti=simulazione(n_snaps)
 	
 	#Animazione

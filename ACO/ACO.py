@@ -12,8 +12,15 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 	def sistema(passi : int):
 		FormicheAttive=list()
 		statoACO=np.zeros((n_agenti*2,1))
+		archiGrafo=list(Grafo.Arcs)
+		statoFerormoni=np.zeros((len(archiGrafo), 1))
 		for j in range(n_agenti):
 			statoACO[[j*2, (j*2)+1]]=np.copy(Nido.posizione)
+			
+		for a in range(len(archiGrafo)):
+			statoFerormoni[a]=tau0
+			
+		snapsFerormoni=np.copy(statoFerormoni)
 		snaps=np.copy(statoACO)
 		
 		for p in range(passi):
@@ -70,7 +77,12 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 				statoACO[[i*2, (i*2)+1]] += dP
 				
 			Grafo.Update()
+			
+			for a in range(len(archiGrafo)):
+				statoFerormoni[a]=archiGrafo[a].Ferormoni
+				
+			snapsFerormoni = np.concatenate((snapsFerormoni, statoFerormoni), axis=1)
 			snaps = np.concatenate((snaps, statoACO), axis=1)
-		return snaps
+		return (snaps, snapsFerormoni)
 	return sistema
 		
