@@ -31,5 +31,5 @@ class ActiveAgent:
 		self.stato[[2,3]]=s
 		
 	def inBound(self, a):
-		diff_vect=self.stato[[0,1]]-a.stato[[0,1]]
+		diff_vect=a.stato[[0,1]]-self.stato[[0,1]]
 		return np.linalg.norm(diff_vect) < ActiveAgent.raggioIntorno
