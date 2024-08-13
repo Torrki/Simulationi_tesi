@@ -42,15 +42,37 @@ def main():
 			x_plt.append( istanti[i*2,nframe] )
 			y_plt.append( istanti[i*2+1,nframe] )
 			
-		points.set_data( np.array([ x_plt,
-																y_plt ]) )
+		points.set_data(x_plt,y_plt)		
+		
+		ax_xMin, ax_xMax = ax.get_xlim()
+		ax_yMin, ax_yMax = ax.get_ylim()
+		
+		y_min, y_max=(min(y_plt), max(y_plt))
+		x_min, x_max=(min(x_plt), max(x_plt))
+		
+		if(x_min <= ax_xMin):
+			ax_xMin -= v0*3
+			
+		if(x_max >= ax_xMax):
+			ax_xMax += v0*3
+			
+		if(y_min <= ax_yMin):
+			ax_yMin -= v0*3
+			
+		if(y_max >= ax_yMax):
+			ax_yMax += v0*3
+		
+		ax.set_xlim([ax_xMin, ax_xMax])
+		ax.set_ylim([ax_yMin, ax_yMax])
+	
 		return points,
+		
+	L=n_agenti/(2.0*linear_density)
+	lim=L*2.0
+	ax.set_xlim([-lim, lim])
+	ax.set_ylim([-lim, lim])
 	
-	L_plot=(n_agenti/(2.0*linear_density))+30
-	ax.set_xlim([-L_plot,L_plot])
-	ax.set_ylim([-L_plot,L_plot])
-	
-	anim=animation.FuncAnimation(fig, update_points, n_snaps, interval=T*1000.0, blit=True)
+	anim=animation.FuncAnimation(fig, update_points, frames=n_snaps, interval=T*1000.0)
 	plt.show()
 	
 if __name__=="__main__":

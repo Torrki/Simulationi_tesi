@@ -15,13 +15,13 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 		archiGrafo=list(Grafo.Arcs)
 		statoFerormoni=np.zeros((len(archiGrafo), 1))
 		for j in range(n_agenti):
-			statoACO[[j*2, (j*2)+1]]=np.copy(Nido.posizione)
+			statoACO[[j*2, (j*2)+1]]=Nido.posizione.copy()
 			
 		for a in range(len(archiGrafo)):
 			statoFerormoni[a]=tau0
 			
-		snapsFerormoni=np.copy(statoFerormoni)
-		snaps=np.copy(statoACO)
+		snapsFerormoni=statoFerormoni.copy()
+		snaps=statoACO.copy()
 		
 		for p in range(passi):
 			if(p % freqSpawn == 0 and len(Formiche) > 0):
@@ -32,7 +32,7 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 				arco0=Nido.ChoiceArc()
 				F0.AppendArc(arco0)
 				direzione0=arco0.Nodi[1].posizione-F0.Posizione
-				direzione0=direzione0/np.linalg.norm(direzione0)
+				direzione0 /= np.linalg.norm(direzione0)
 				F0.Direzione=direzione0
 			
 			for i in range(len(FormicheAttive)):
@@ -46,7 +46,7 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 							f.AppendArc(arco)
 									
 							direzione=arco.Nodi[1].posizione-f.Posizione
-							direzione=direzione/np.linalg.norm(direzione)
+							direzione /= np.linalg.norm(direzione)
 							f.Direzione=direzione
 						elif(lastArc.Nodi[1] is NodoCibo):
 							f.Cibo= True
@@ -60,7 +60,7 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 						if(lastArc.Nodi[0] is not Nido):
 							lastArc=f.Percorso[-1]
 							direzione=lastArc.Nodi[0].posizione-f.Posizione
-							direzione=direzione/np.linalg.norm(direzione)
+							direzione /= np.linalg.norm(direzione)
 							f.Direzione=direzione
 						else:
 							f.Cibo= False
@@ -69,7 +69,7 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 							arco0=Nido.ChoiceArc()
 							f.AppendArc(arco0)
 							direzione0=arco0.Nodi[1].posizione-f.Posizione
-							direzione0=direzione0/np.linalg.norm(direzione0)
+							direzione0 /= np.linalg.norm(direzione0)
 							f.Direzione=direzione0
 						
 				dP=T*(V/lastArc.Costo)*f.Direzione

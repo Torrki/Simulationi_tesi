@@ -1,0 +1,102 @@
+from ArtificialBird import ArtificialBird as AB
+import numpy as np
+from numpy import random as rnd
+
+def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_attr):
+	seme_random=120
+	velocitaMedia=1
+	deviazioneStd=0.01
+	gen=rnd.default_rng(seme_random) #Random Generator
+	L=n_agenti/(2.0*densita) #Raddoppio perchè lo spazio va da -L a L, dunque in lunghezza 2L
+	AB.EvalFunction=fEval
+
+	def sistema(n_snaps):
+		posizioniIniziali=gen.uniform(low=-L, high=L, size=(n_agenti,2))
+
+		angoliIniziali=gen.uniform(high=2*np.pi, size=(1,n_agenti))
+		orientamentiIniziali=np.array( [np.cos(angoliIniziali[0]),np.sin(angoliIniziali[0])] )
+
+		moduliVelocitaIniziali=gen.normal(loc=velocitaMedia, scale=deviazioneStd, size=(1,n_agenti))
+		moduliVelocitaIniziali = np.concatenate((moduliVelocitaIniziali, moduliVelocitaIniziali))
+		velocitaIniziali=(moduliVelocitaIniziali*orientamentiIniziali).T
+
+		Uccelli=[AB(posizioniIniziali[i], velocitaIniziali[i]) for i in range(n_agenti)]
+
+		#Definizione topologia
+		DizionarioVicini = dict()
+		for u in Uccelli:
+			I=set(Uccelli)-{u}	
+			DizionarioVicini[u]=set(Uccelli)-{u}
+			
+			for uv in I:
+				scelta=gen.choice([True, False], p=[1/2, 1/2])
+				if(scelta):
+					DizionarioVicini[u] -= {uv}
+
+		#Definizione valori autovalori nel tempo
+		def Autovalore(a_min, a_max):
+			t=0
+			while(t <= n_snaps):
+				yield a_max - (a_max-a_min)*(t/n_snaps)
+				t += 1
+
+		for u in Uccelli:
+			u.Vicini = DizionarioVicini[u]
+
+		InsiemeValutazioni={(u,AB.EvalFunction(u.Posizione[0][0], u.Posizione[1][0])) for u in Uccelli}
+		valutazioneMax=max(InsiemeValutazioni, key=lambda coppia: coppia[1])[1]
+		InsiemeMigliori={coppia[0] for coppia in InsiemeValutazioni if coppia[1]==valutazioneMax}
+		AgenteMigliore=InsiemeMigliori.pop()
+
+		statoPSO=np.zeros((n_agenti*2,1))
+		for u in range(len(Uccelli)):
+			statoPSO[[u*2,(u*2)+1]]=Uccelli[u].Posizione
+			
+			del Uccelli[u].PosizioneMiglioreGlobale
+			Uccelli[u].PosizioneMiglioreGlobale=AgenteMigliore.Posizione.copy()
+
+		snaps=statoPSO.copy()
+		GenAutovalori=Autovalore(0.8,1.5)
+		for p in range(n_snaps):
+			autovaloreP=next(GenAutovalori)		
+			for u in range(n_agenti):
+				Ucc=Uccelli[u]
+				#Prova con forza di attrazione
+				
+				fAttrazione=np.zeros((2,1))
+				for uv in Ucc.Vicini:
+					distanza = uv.Posizione-Ucc.Posizione
+					normaDistanza=np.linalg.norm(distanza)
+					if(normaDistanza > 1):
+						distanza /= normaDistanza
+						
+					fAttrazione += (normaDistanza - D_attr)*distanza
+				
+				vel_succ = autovaloreP*Ucc.Velocita + c1*(Ucc.PosizioneMigliore[0]-Ucc.Posizione) + c2*(Ucc.PosizioneMiglioreGlobale-Ucc.Posizione) + betaAttrazione*fAttrazione
+				normaVelocita=np.linalg.norm(vel_succ)
+				
+				if normaVelocita > velocitaMax:
+					c=normaVelocita/velocitaMax
+					vel_succ /= c
+				
+				Ucc.Velocita=vel_succ.copy()
+				Ucc.Posizione += T_sim*Ucc.Velocita
+				valutazioneP=AB.EvalFunction(Ucc.Posizione[0][0], Ucc.Posizione[1][0])
+
+				if valutazioneP > Ucc.PosizioneMigliore[1]:
+					Ucc.PosizioneMigliore=(Ucc.Posizione.copy(), valutazioneP)
+					
+				statoPSO[[u*2,(u*2)+1]]=Ucc.Posizione
+			
+			for u1 in Uccelli:
+				UccMigliore=max(u1.Vicini, key=lambda uv: uv.PosizioneMigliore[1])
+				if u1.PosizioneMigliore[1] > UccMigliore.PosizioneMigliore[1]:
+					UccMigliore=u1
+				
+				del u1.PosizioneMiglioreGlobale
+				u1.PosizioneMiglioreGlobale=UccMigliore.Posizione.copy()
+				
+			snaps=np.concatenate((snaps, statoPSO), axis=1)
+		return snaps.T
+	return sistema
+
