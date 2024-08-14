@@ -2,12 +2,29 @@ import ArtificialAnt as AA
 from Grafo import *
 
 def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: float, tau0: float, Q: float, Grafo: Grafo):
+	'''
+	Funzione per la configurazione di un modello ACO:
+	T_sim 						è il periodo di osservazione
+	freqSpawn					ogni quanti passi attivare le nuove formiche
+	V						 			è la velocità degli agenti
+	n_agenti					è il numero di agenti attivi
+	rho								è il tasso di evaporazione
+	tau0							è la condizione iniziale dei ferormoni
+	Q									ferormoni rilasciati dalle formiche
+	Grafo							grafo che rappresenta la mappa delle formiche
+	
+	Torna una funzione generatore
+	'''
 	Nido=Grafo.Nido
 	NodoCibo=Grafo.NodoCibo
 
 	Formiche={AA.ArtificialAnt(Nido) for f in range(n_agenti)}
 
 	def sistema(passi : int):
+		'''
+		Funzione per la simulazione del modello ACO
+		passi			è il numero di passi della simulazione
+		'''
 		FormicheAttive=list()
 		statoACO=np.zeros((n_agenti*2,1))
 		archiGrafo=list(Grafo.Arcs)

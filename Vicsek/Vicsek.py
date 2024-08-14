@@ -13,6 +13,8 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 	beta				è l'intensità della forza di attrazione-repulsione
 	R0					è il raggio che definisce l'intorno degli agenti
 	Dattr				è la distanza minima tra gli agenti nella forza di attrazione
+	
+	Torna una funzione generatore
 	'''
 	ActiveAgent.raggioIntorno=float(R0)
 	seme_random=55
