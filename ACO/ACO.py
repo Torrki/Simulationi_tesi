@@ -2,8 +2,6 @@ import ArtificialAnt as AA
 from Grafo import *
 
 def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: float, tau0: float, Q: float, Grafo: Grafo):
-	AA.ArtificialAnt.Q=Q
-	AA.ArtificialAnt.V=V
 	Nido=Grafo.Nido
 	NodoCibo=Grafo.NodoCibo
 
@@ -14,14 +12,12 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 		statoACO=np.zeros((n_agenti*2,1))
 		archiGrafo=list(Grafo.Arcs)
 		statoFerormoni=np.zeros((len(archiGrafo), 1))
+		CostiFormiche=dict()
 		for j in range(n_agenti):
-			statoACO[[j*2, (j*2)+1]]=Nido.posizione.copy()
+			statoACO[[j*2, (j*2)+1]]=Nido.Posizione
 			
 		for a in range(len(archiGrafo)):
 			statoFerormoni[a]=tau0
-			
-		snapsFerormoni=statoFerormoni.copy()
-		snaps=statoACO.copy()
 		
 		for p in range(passi):
 			if(p % freqSpawn == 0 and len(Formiche) > 0):
@@ -30,10 +26,11 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 				FormicheAttive.append(F0)
 				
 				arco0=Nido.ChoiceArc()
-				F0.AppendArc(arco0)
-				direzione0=arco0.Nodi[1].posizione-F0.Posizione
+				F0.Percorso.append(arco0)
+				direzione0=arco0.Nodi[1].Posizione-F0.Posizione
 				direzione0 /= np.linalg.norm(direzione0)
 				F0.Direzione=direzione0
+				CostiFormiche[F0]=arco0.Costo
 			
 			for i in range(len(FormicheAttive)):
 				f=FormicheAttive[i]
@@ -43,9 +40,10 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 						arco=lastArc.Nodi[1].ChoiceArc()
 							
 						if(arco is not None):
-							f.AppendArc(arco)
+							f.Percorso.append(arco)
+							CostiFormiche[f] += arco.Costo
 									
-							direzione=arco.Nodi[1].posizione-f.Posizione
+							direzione=arco.Nodi[1].Posizione-f.Posizione
 							direzione /= np.linalg.norm(direzione)
 							f.Direzione=direzione
 						elif(lastArc.Nodi[1] is NodoCibo):
@@ -53,36 +51,34 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 							f.Direzione = -f.Direzione
 				else:
 					#Rilascio ferormoni
-					lastArc.RilascioFormiche += Q/f.CostoPercorso
+					lastArc.RilascioFormiche += Q
 					if(lastArc.Nodi[0].InBound(f.Posizione)):
 						
 						f.Percorso.pop()
 						if(lastArc.Nodi[0] is not Nido):
 							lastArc=f.Percorso[-1]
-							direzione=lastArc.Nodi[0].posizione-f.Posizione
+							direzione=lastArc.Nodi[0].Posizione-f.Posizione
 							direzione /= np.linalg.norm(direzione)
 							f.Direzione=direzione
 						else:
 							f.Cibo= False
-							f.CostoPercorso=0
 							
 							arco0=Nido.ChoiceArc()
-							f.AppendArc(arco0)
-							direzione0=arco0.Nodi[1].posizione-f.Posizione
+							f.Percorso.append(arco0)
+							direzione0=arco0.Nodi[1].Posizione-f.Posizione
 							direzione0 /= np.linalg.norm(direzione0)
 							f.Direzione=direzione0
+							CostiFormiche[f]=arco0.Costo
 						
-				dP=T*(V/lastArc.Costo)*f.Direzione
+				dP=T*V*f.Direzione
 				f.Posizione += dP
-				statoACO[[i*2, (i*2)+1]] += dP
+				statoACO[[i*2, i*2+1]] += dP
 				
 			Grafo.Update()
 			
 			for a in range(len(archiGrafo)):
 				statoFerormoni[a]=archiGrafo[a].Ferormoni
 				
-			snapsFerormoni = np.concatenate((snapsFerormoni, statoFerormoni), axis=1)
-			snaps = np.concatenate((snaps, statoACO), axis=1)
-		return (snaps, snapsFerormoni)
+			yield (statoACO.copy(), statoFerormoni.copy(), p)
 	return sistema
 		

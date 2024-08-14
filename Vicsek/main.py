@@ -35,12 +35,12 @@ def main():
 	fig, ax=plt.subplots()
 	points, =ax.plot([], [],'o')
 	
-	def update_points(nframe):
+	def update_points(statoVicsek):
 		x_plt=list()
 		y_plt=list()
 		for i in range(n_agenti):
-			x_plt.append( istanti[i*2,nframe] )
-			y_plt.append( istanti[i*2+1,nframe] )
+			x_plt.append( statoVicsek[i*2][0] )
+			y_plt.append( statoVicsek[i*2+1][0] )
 			
 		points.set_data(x_plt,y_plt)		
 		
@@ -72,7 +72,7 @@ def main():
 	ax.set_xlim([-lim, lim])
 	ax.set_ylim([-lim, lim])
 	
-	anim=animation.FuncAnimation(fig, update_points, frames=n_snaps, interval=T*1000.0)
+	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, blit=True)
 	plt.show()
 	
 if __name__=="__main__":

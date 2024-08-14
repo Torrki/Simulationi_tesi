@@ -13,8 +13,6 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 	beta				è l'intensità della forza di attrazione-repulsione
 	R0					è il raggio che definisce l'intorno degli agenti
 	Dattr				è la distanza minima tra gli agenti nella forza di attrazione
-	
-	torna una funzione che permette di eseguire la simulazione
 	'''
 	ActiveAgent.raggioIntorno=float(R0)
 	seme_random=55
@@ -26,20 +24,18 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 	orientamentiIniziali=np.array( [ np.cos(angoliIniziali[0]),np.sin(angoliIniziali[0]) ], dtype=np.dtype(float) ).T
 																	
 	agenti= [ ActiveAgent(posizioniIniziali[k], orientamentiIniziali[k] ) for k in range(N)] #creazione degli N agenti con gli stati iniziali
+	
+	del posizioniIniziali, angoliIniziali, orientamentiIniziali
 
 	def sistema(passi: int):
 		'''
 		Funzione per la simulazione del modello Vicsek
 		passi			è il numero di passi della simulazione
-		
-		Torna una matrice (N*2)Xpassi in cui la colonna k-esima è lo stato del sistema al passo k-esimo
 		'''
-		statoVicsek=agenti[0].Posizione.copy()	#creo lo stato iniziale del sistema, che comprende solo le posizioni degli agenti
-		for i in range(1, N):
-			statoVicsek=np.concatenate( (statoVicsek, agenti[i].Posizione) )
+		statoVicsek=np.zeros((N*2,1))	#creo lo stato iniziale del sistema, che comprende solo le posizioni degli agenti
+		for i in range(N):
+			statoVicsek[[i*2,i*2+1]]=agenti[i].Posizione
 			
-		snaps=statoVicsek.copy()
-		
 		#simulazione dei passi
 		for k in range(passi):
 			for i in range(N):
@@ -61,15 +57,14 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 				rumore /= np.linalg.norm(rumore)
 					
 				dP=T*v0*s_i
-				statoVicsek[[i_stato,i_stato+1]] += dP
-				agenti[i].Posizione += dP	#aggiornamento delle posizioni nello stato
+				agenti[i].Posizione += dP								#aggiornamento delle posizioni nello stato
+				statoVicsek[[i_stato,i_stato+1]]+=dP
 				
 				new_s=s_vicini+eta*rumore
 				new_s /= np.linalg.norm(new_s)
-				agenti[i].Orientamento=new_s.copy()	#aggiornamento dell'orientamento degli agenti
+				agenti[i].Orientamento=new_s	#aggiornamento dell'orientamento degli agenti
 				
-			snaps=np.concatenate((snaps, statoVicsek),axis=1) #aggiungo il nuovo stato nella raccolta
-		return snaps
+			yield statoVicsek.copy()
 	
 	return sistema
 

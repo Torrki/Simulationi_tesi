@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import random as rnd
 
-lowerBound=1e-6
+lowerBound=1e-6	#per evitare che il valore dei ferormoni vada a 0, creerebbe underflow del valore e una divisione per 0 nel calcolo della probabilità
 
 class ArcoGrafo:
 	def __init__(self, tau_0, rho, N1, N2, c):
@@ -14,7 +14,8 @@ class ArcoGrafo:
 		N2.LinkArco(self)
 		
 	def Update(self):
-		tmp=(1-self.TassoEvaporazione)*self.Ferormoni + self.RilascioFormiche + lowerBound
+		U=lowerBound if self.RilascioFormiche == 0 else self.RilascioFormiche
+		tmp=(1-self.TassoEvaporazione)*self.Ferormoni + U
 		self.Ferormoni=tmp
 		self.RilascioFormiche=0
 		
@@ -29,7 +30,7 @@ class ArcoGrafo:
 		
 class NodoGrafo:
 	def __init__(self, x, y):
-		self.posizione=np.array([[x],[y]], dtype=np.dtype(float))
+		self.Posizione=np.array([[x],[y]], dtype=np.dtype(float))
 		self.Archi=set()
 	
 	def LinkArco(self, arco):
@@ -44,7 +45,7 @@ class NodoGrafo:
 			return rnd.choice(arrayArchi, p=arrayProbs)
 			
 	def InBound(self, pos):
-		distanza=pos-self.posizione
+		distanza=pos-self.Posizione
 		return np.linalg.norm(distanza) < 2e-1
 			
 class Grafo:
@@ -77,5 +78,5 @@ class Grafo:
 			for a in n.Archi:
 				if a not in archiAggiornati:
 					a.Update()
-					archiAggiornati=archiAggiornati.union({a})
+					archiAggiornati |= {a}
 

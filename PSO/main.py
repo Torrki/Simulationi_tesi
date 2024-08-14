@@ -55,22 +55,20 @@ def main():
 	n_snaps=int(argsCmd.n_snaps)
 	D_attr=float(argsCmd.D_attr)
 	
-	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, Cerchio, D_attr)
+	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, Paraboloide_0, D_attr)
 	istanti=simulazione(n_snaps)
 	
 	#Animazione
 	fig, axAn =plt.subplots()
 	points, =axAn.plot([], [],'bo')
 			
-	def update_figure(nframe):
-		istanteAgenti=istanti[nframe]
-		
+	def update_figure(statoPSO):		
 		x_plt=list()
 		y_plt=list()
 		
 		for i in range(n_agenti):
-			x_plt.append(istanteAgenti[i*2])
-			y_plt.append(istanteAgenti[i*2+1])
+			x_plt.append(statoPSO[i*2][0])
+			y_plt.append(statoPSO[i*2+1][0])
 			
 		xlimMin, xlimMax=axAn.get_xlim()
 		ylimMin, ylimMax=axAn.get_ylim()
@@ -88,7 +86,7 @@ def main():
 	lim=L*1.3
 	axAn.set_xlim([-lim, lim])
 	axAn.set_ylim([-lim, lim])
-	anim=animation.FuncAnimation(fig, update_figure, frames=n_snaps, interval=T_sim*1000.0)
+	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0)
 	plt.show()
 	
 if(__name__ == "__main__"):
