@@ -65,8 +65,14 @@ def main():
 	listaFerormoni=list()
 	t_plt=list()
 	
-	for a in range(numeroArchi):
+	xLines= [c[0] for c in coords]
+	yLines= [c[1] for c in coords]
+	
+	for a in G.Arcs:
 		l, =axGr.plot([], [],lw=2)
+		xLine=(a.Nodi[0].Posizione[0][0], a.Nodi[1].Posizione[0][0])
+		yLine=(a.Nodi[0].Posizione[1][0], a.Nodi[1].Posizione[1][0])
+		axAn.plot(xLine, yLine, lw=2, c=l.get_color(), ls='-')
 		listaLinee.append(l)
 		listaFerormoni.append(list())
 	
@@ -80,7 +86,7 @@ def main():
 		L_x = 0.1 * (X_max-X_min)
 		L_y = 0.1 * (Y_max-Y_min)
 		axGr.set_xlim([0, 1])
-		axGr.set_ylim([0,tau0*1.5])
+		axGr.set_ylim([0, 1.2])
 		axAn.set_xlim([X_min-L_x,X_max+L_x])
 		axAn.set_ylim([Y_min-L_y,Y_max+L_y])		
 		del t_plt[:]
@@ -109,7 +115,17 @@ def main():
 		fmin, fmax = axGr.get_ylim()
 		
 		if(t >= tmax):
-			tmax *= 2
+			if(tmax >= 8.0):
+				tmax += 3.0
+				tmin += 3.0
+				
+				nIstantiDel = int(3/T_sim)
+				
+				del t_plt[:nIstantiDel]
+				for a in range(numeroArchi):
+					del listaFerormoni[a][:nIstantiDel]
+			else:
+				tmax *= 2
 			axGr.set_xlim([tmin, tmax])
 			
 		if(f >= fmax):

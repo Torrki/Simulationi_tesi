@@ -1,0 +1,15 @@
+PSO #1:
+	python3 main.py 30 1500 0.01 12 1 2 10 0.05 4
+	autovalore da 1.5 a 0.99
+	
+PSO #2:
+	python3 main.py 30 1500 0.01 12 1 4 10 0.2 9
+	autovalore da 1.5 a 0.99
+	
+PSO #3:
+	python3 main.py 30 1500 0.01 9 0.2 10 2 0.1 4
+	autovalore da 1.5 a 0.75
+	
+PSO #4:
+	python3 main.py 40 1500 0.01 7 0.6 10 1 0.2 2
+	autovalore da 1.5 a 0.75

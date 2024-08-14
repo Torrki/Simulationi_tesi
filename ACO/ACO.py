@@ -68,7 +68,7 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 							f.Direzione = -f.Direzione
 				else:
 					#Rilascio ferormoni
-					lastArc.RilascioFormiche += Q
+					lastArc.RilascioFormiche += Q/CostiFormiche[f]
 					if(lastArc.Nodi[0].InBound(f.Posizione)):
 						
 						f.Percorso.pop()
@@ -87,7 +87,7 @@ def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: fl
 							f.Direzione=direzione0
 							CostiFormiche[f]=arco0.Costo
 						
-				dP=T*V*f.Direzione
+				dP=T*(V/lastArc.Costo)*f.Direzione
 				f.Posizione += dP
 				statoACO[[i*2, i*2+1]] += dP
 				
