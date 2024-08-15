@@ -32,17 +32,51 @@ def main():
 	istanti=simulazione(n_snaps)
 	
 	#Animazione
-	fig, ax=plt.subplots()
-	points, =ax.plot([], [],'o')
+	fig, (ax, axGr)=plt.subplots(nrows=2, ncols=1, figsize=(10,9))
+	points, =ax.plot([], [], 'bo')
+	vecVel, =ax.plot([], [], lw=2, color='red')
+	l, =axGr.plot([], [], lw=2)
+	phase_plt=list()
+	t_plt=list()
+	vecPrec=None
 	
-	def update_points(statoVicsek):
+	def init_plot():
+		axGr.set_xlim([0, 1])
+		axGr.set_ylim([-5, 5])	
+		del t_plt[:]
+		del phase_plt[:]
+		l.set_data(t_plt, phase_plt)
+		
+		return l,
+	
+	def update_points(dati):
+		global vecPrec
+		statoVicsek, velocitaVicsek, CMVicsek, t = dati
 		x_plt=list()
 		y_plt=list()
+		faseVelVec=np.arctan2(velocitaVicsek[1][0], velocitaVicsek[0][0])
+		
+		if(t==0):
+			vecPrec=velocitaVicsek.copy()
+			phase_plt.append(faseVelVec)
+		else:
+			coseno = (vecPrec.T @ velocitaVicsek)/(np.linalg.norm(vecPrec)*np.linalg.norm(velocitaVicsek))
+			angolo= np.arccos(coseno)[0][0]
+			
+			vecPrecRot=(np.array([[0, -1], [1, 0]]) @ vecPrec).T
+			if( vecPrecRot @ velocitaVicsek <= 0):
+				angolo *= -1
+			
+			phase_plt.append( phase_plt[-1] + angolo )
+			vecPrec=velocitaVicsek.copy()
+		
 		for i in range(n_agenti):
 			x_plt.append( statoVicsek[i*2][0] )
 			y_plt.append( statoVicsek[i*2+1][0] )
 			
-		points.set_data(x_plt,y_plt)		
+		moduloVelVec=np.linalg.norm(velocitaVicsek)
+		t *= T
+		t_plt.append(t)
 		
 		ax_xMin, ax_xMax = ax.get_xlim()
 		ax_yMin, ax_yMax = ax.get_ylim()
@@ -64,15 +98,45 @@ def main():
 		
 		ax.set_xlim([ax_xMin, ax_xMax])
 		ax.set_ylim([ax_yMin, ax_yMax])
+		
+		tmin, tmax = axGr.get_xlim()
+		fmin, fmax = axGr.get_ylim()
+		
+		if(t >= tmax):
+			if(tmax >= 8.0):
+				tmax += 3.0
+				tmin += 3.0
+				
+				nIstantiDel = int(3/T)
+				
+				del t_plt[:nIstantiDel]
+				del phase_plt[:nIstantiDel]
+			else:
+				tmax *= 2
+			axGr.set_xlim([tmin, tmax])
+				
+		if(phase_plt[-1] >= fmax):
+			fmax *= 2
+			axGr.set_ylim([fmin, fmax])
+		elif(phase_plt[-1] <= fmin):
+			fmin *= 2
+			axGr.set_ylim([fmin, fmax])
+				
+			
+		points.set_data(x_plt,y_plt)
+		vecVel.set_data([CMVicsek[0][0], CMVicsek[0][0]+3*np.cos(faseVelVec)], [CMVicsek[1][0], CMVicsek[1][0]+3*np.sin(faseVelVec)])
+		l.set_data(t_plt, phase_plt)
 	
-		return points,
+		return points, vecVel, l
 		
 	L=n_agenti/(2.0*linear_density)
 	lim=L*2.0
 	ax.set_xlim([-lim, lim])
 	ax.set_ylim([-lim, lim])
+	axGr.set_xlim([0,5])
+	axGr.set_ylim([-4,4])
 	
-	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, blit=True)
+	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, init_func=init_plot)
 	plt.show()
 	
 if __name__=="__main__":
