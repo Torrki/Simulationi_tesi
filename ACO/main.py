@@ -1,5 +1,4 @@
 import argparse
-import itertools
 from matplotlib import pyplot as plt
 from matplotlib import animation
 from Grafo import *
@@ -56,9 +55,7 @@ def main():
 	G.LinkNodes(Nodi[11], Nodi[14],1)
 	
 	simulazione=ACO(n_agenti, n_snaps, T_sim, freq_spawn, v0, rho, tau0, Q, G)
-	(istanti, ferormoni)=simulazione(n_snaps)
-	istanti = np.transpose(istanti)
-	ferormoni=np.transpose(ferormoni)
+	istanti=simulazione(n_snaps)
 
 	#Animazione
 	fig, (axAn,axGr) =plt.subplots(nrows=2, ncols=1, figsize=(10,9))
@@ -68,8 +65,14 @@ def main():
 	listaFerormoni=list()
 	t_plt=list()
 	
-	for a in range(numeroArchi):
+	xLines= [c[0] for c in coords]
+	yLines= [c[1] for c in coords]
+	
+	for a in G.Arcs:
 		l, =axGr.plot([], [],lw=2)
+		xLine=(a.Nodi[0].Posizione[0][0], a.Nodi[1].Posizione[0][0])
+		yLine=(a.Nodi[0].Posizione[1][0], a.Nodi[1].Posizione[1][0])
+		axAn.plot(xLine, yLine, lw=2, c=l.get_color(), ls='-')
 		listaLinee.append(l)
 		listaFerormoni.append(list())
 	
@@ -83,48 +86,51 @@ def main():
 		L_x = 0.1 * (X_max-X_min)
 		L_y = 0.1 * (Y_max-Y_min)
 		axGr.set_xlim([0, 1])
-		axGr.set_ylim([0,0.5])
+		axGr.set_ylim([0, 1.2])
 		axAn.set_xlim([X_min-L_x,X_max+L_x])
-		axAn.set_ylim([Y_min-L_y,Y_max+L_y])
+		axAn.set_ylim([Y_min-L_y,Y_max+L_y])		
+		del t_plt[:]
 		
-		del t_plt[:]		
 		for a in range(numeroArchi):
 			del listaFerormoni[a][:]
 			listaLinee[a].set_data(t_plt, listaFerormoni[a])
-			
-		return tuple(listaLinee)
-		
 
-	def update_figure(nframe):
-		t=nframe*T_sim
-		istanteAgenti=istanti[nframe]
-		datiFerormoni=ferormoni[nframe]
-		
+	def update_figure(dati):
+		statoACO, statoFerormoni, t=dati
 		x_plt=list()
 		y_plt=list()
+		t *= T_sim
 		
 		for i in range(n_agenti):
-			x_plt.append(istanteAgenti[i*2])
-			y_plt.append(istanteAgenti[i*2+1])
+			x_plt.append(statoACO[i*2][0])
+			y_plt.append(statoACO[i*2+1][0])
 			
 		t_plt.append(t)
-		f=datiFerormoni[0]
+		f=statoFerormoni[0]
 		for a in range(numeroArchi):
-			listaFerormoni[a].append(datiFerormoni[a])
-			f = datiFerormoni[a] if datiFerormoni[a] > f else f
+			listaFerormoni[a].append(statoFerormoni[a])
+			f = statoFerormoni[a] if statoFerormoni[a] > f else f
 																		
 		tmin, tmax = axGr.get_xlim()
 		fmin, fmax = axGr.get_ylim()
 		
 		if(t >= tmax):
-			tmax *= 2
+			if(tmax >= 8.0):
+				tmax += 3.0
+				tmin += 3.0
+				
+				nIstantiDel = int(3/T_sim)
+				
+				del t_plt[:nIstantiDel]
+				for a in range(numeroArchi):
+					del listaFerormoni[a][:nIstantiDel]
+			else:
+				tmax *= 2
 			axGr.set_xlim([tmin, tmax])
-			axGr.figure.canvas.draw()
 			
 		if(f >= fmax):
 			fmax *= 2
 			axGr.set_ylim([fmin, fmax])
-			axGr.figure.canvas.draw()
 							
 		points.set_data(x_plt, y_plt)
 		for a in range(numeroArchi):
@@ -132,7 +138,7 @@ def main():
 		
 		return [points] + listaLinee
 
-	anim=animation.FuncAnimation(fig, update_figure, frames=n_snaps, interval=T_sim*1000.0, init_func=init_plot)
+	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0, init_func=init_plot)
 	plt.show()
 	
 if(__name__ == "__main__"):
