@@ -1,17 +1,16 @@
 import ArtificialAnt as AA
 from Grafo import *
 
-def ACO(n_agenti: int, n_snaps: int, T: float, freqSpawn: int, V: float, rho: float, tau0: float, Q: float, Grafo: Grafo):
+def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, Q: float, Grafo: Grafo):
 	'''
 	Funzione per la configurazione di un modello ACO:
-	T_sim 						è il periodo di osservazione
-	freqSpawn					ogni quanti passi attivare le nuove formiche
-	V						 			è la velocità degli agenti
-	n_agenti					è il numero di agenti attivi
-	rho								è il tasso di evaporazione
-	tau0							è la condizione iniziale dei ferormoni
-	Q									ferormoni rilasciati dalle formiche
-	Grafo							grafo che rappresenta la mappa delle formiche
+	T_sim 				è il periodo di osservazione
+	freqSpawn			ogni quanti passi attivare le nuove formiche
+	V					è la velocità degli agenti
+	n_agenti			è il numero di agenti attivi
+	tau0				è la condizione iniziale dei ferormoni
+	Q					ferormoni rilasciati dalle formiche
+	Grafo				grafo che rappresenta la mappa delle formiche
 	
 	Torna una funzione generatore
 	'''

@@ -1,5 +1,5 @@
-import numpy as np
-from numpy import random as rnd
+import numpy as np # type: ignore
+from numpy import random as rnd # type: ignore
 
 lowerBound=1e-6	#per evitare che il valore dei ferormoni vada a 0, creerebbe underflow del valore e una divisione per 0 nel calcolo della probabilità
 
@@ -69,7 +69,7 @@ class Grafo:
 			
 	def LinkNodes(self, Ns, Ne, costo):
 		if Ns in self.Nodi and Ne in self.Nodi:
-			nuovoArco=ArcoGrafo(self.Tau0, self.Rho, Ns, Ne, costo)
+			ArcoGrafo(self.Tau0, self.Rho, Ns, Ne, costo)
 			
 	def Update(self):	
 		archiAggiornati=set()

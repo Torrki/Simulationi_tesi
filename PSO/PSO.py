@@ -1,19 +1,19 @@
 from ArtificialBird import ArtificialBird as AB
-import numpy as np
-from numpy import random as rnd
+import numpy as np # type: ignore
+from numpy import random as rnd # type: ignore
 
 def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_attr):
 	'''
 	Funzione per la configurazione di un modello PSO:
-	T_sim 						è il periodo di osservazione
-	densita 					è la densità degli agenti nello spazio
-	velocitaMax 			è la velocità massima degli agenti
-	n_agenti					è il numero di agenti attivi
-	c1								è l'intensità dell'apprendimento individuale
-	c2								è l'intensità dell'apprendimento sociale
+	T_sim 				è il periodo di osservazione
+	densita 			è la densità degli agenti nello spazio
+	velocitaMax 		è la velocità massima degli agenti
+	n_agenti			è il numero di agenti attivi
+	c1					è l'intensità dell'apprendimento individuale
+	c2					è l'intensità dell'apprendimento sociale
 	betaAttrazione		è l'intensità della forza di attrazione-repulsione
-	fEval							è la funzione di valutazione nello spazio, deve essere f(x,y) -> float
-	Dattr							è la distanza minima tra gli agenti nella forza di attrazione
+	fEval				è la funzione di valutazione nello spazio, deve essere f(x,y) -> float
+	Dattr				è la distanza minima tra gli agenti nella forza di attrazione
 	
 	Torna una funzione generatore
 	'''
@@ -69,7 +69,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 				yield a_max - (a_max-a_min)*(t/n_snaps)
 				t += 1
 		
-		GenAutovalori=Autovalore(0.75,1.5)
+		GenAutovalori=Autovalore(1,1.5)
 		statoPSO=np.zeros((n_agenti*2,1))
 		for u in range(len(Uccelli)):
 			statoPSO[[u*2,u*2+1]]=Uccelli[u].Posizione

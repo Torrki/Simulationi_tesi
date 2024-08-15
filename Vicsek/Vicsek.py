@@ -1,25 +1,25 @@
-import numpy as np
-import numpy.random as rnd
+import numpy as np # type: ignore
+import numpy.random as rnd # type: ignore
 from ActiveAgent import ActiveAgent
 
-def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int): #funzione wrapper per configurare la simulazione
+def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int): #funzione wrapper per configurare la simulazione
 	'''
 	Funzione per la configurazione di un modello Vicsek:
-	T 					è il periodo di osservazione
-	density 		è la densità degli agenti nello spazio
-	v0 					è la velocità degli agenti
-	N						è il numero di agenti attivi
-	eta					è l'intensità del rumore
-	beta				è l'intensità della forza di attrazione-repulsione
-	R0					è il raggio che definisce l'intorno degli agenti
-	Dattr				è la distanza minima tra gli agenti nella forza di attrazione
+	T 			è il periodo di osservazione
+	densita 	è la densità degli agenti nello spazio
+	v0 			è la velocità degli agenti
+	N			è il numero di agenti attivi
+	eta			è l'intensità del rumore
+	beta		è l'intensità della forza di attrazione-repulsione
+	R0			è il raggio che definisce l'intorno degli agenti
+	Dattr		è la distanza minima tra gli agenti nella forza di attrazione
 	
 	Torna una funzione generatore
 	'''
 	ActiveAgent.raggioIntorno=float(R0)
 	seme_random=55
 	gen=rnd.default_rng(seme_random) #Random Generator
-	L=N/(2.0*density) #Raddoppio perchè lo spazio va da -L a L, dunque in lunghezza 2L
+	L=N/(2.0*densita) #Raddoppio perchè lo spazio va da -L a L, dunque in lunghezza 2L
 	
 	posizioniIniziali=gen.uniform(low=-L, high=L, size=(N,2))
 	angoliIniziali=gen.uniform(high=2*np.pi, size=(1,N))

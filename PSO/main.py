@@ -1,7 +1,7 @@
 import argparse
-from matplotlib import pyplot as plt
-from matplotlib import animation
-import numpy as np
+from matplotlib import pyplot as plt # type: ignore
+from matplotlib import animation # type: ignore
+import numpy as np # type: ignore
 from PSO import PSO
 
 def MinimiLocali(x,y):
@@ -38,7 +38,7 @@ def main():
 	parser_args.add_argument("n_snaps", help="Numero di snapshot dello stato del sistema")
 	parser_args.add_argument("T_sim", help="Passo di simulazione")
 	parser_args.add_argument("v_max", help="Modulo della velocità massima degli agenti")
-	parser_args.add_argument("densita_lineare", help="Densità degli agenti lungo gli assi del sistema di riferimento")
+	parser_args.add_argument("densita", help="Densità degli agenti lungo gli assi del sistema di riferimento")
 	parser_args.add_argument("c1", help="Intensità dell'apprendimento individuale")
 	parser_args.add_argument("c2", help="Intensità dell'apprendimento sociale")
 	parser_args.add_argument("beta_attr", help="Intensità della forza di attrazione")
@@ -46,7 +46,7 @@ def main():
 	argsCmd=parser_args.parse_args()
 	
 	T_sim=float(argsCmd.T_sim)
-	densita=float(argsCmd.densita_lineare)
+	densita=float(argsCmd.densita)
 	v_max=float(argsCmd.v_max)
 	n_agenti=int(argsCmd.n_agenti)
 	c1=float(argsCmd.c1)
@@ -55,7 +55,7 @@ def main():
 	n_snaps=int(argsCmd.n_snaps)
 	D_attr=float(argsCmd.D_attr)
 	
-	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, Cerchio, D_attr)
+	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, MinimiLocali, D_attr)
 	istanti=simulazione(n_snaps)
 	
 	#Animazione
@@ -69,9 +69,6 @@ def main():
 		for i in range(n_agenti):
 			x_plt.append(statoPSO[i*2][0])
 			y_plt.append(statoPSO[i*2+1][0])
-			
-		xlimMin, xlimMax=axAn.get_xlim()
-		ylimMin, ylimMax=axAn.get_ylim()
 		
 		y_min, y_max=(min(y_plt), max(y_plt))
 		x_min, x_max=(min(x_plt), max(x_plt))
@@ -86,7 +83,7 @@ def main():
 	lim=L*1.3
 	axAn.set_xlim([-lim, lim])
 	axAn.set_ylim([-lim, lim])
-	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0)
+	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0, save_count=200)
 	plt.show()
 	
 if(__name__ == "__main__"):

@@ -1,6 +1,6 @@
 import argparse
-from matplotlib import pyplot as plt
-from matplotlib import animation
+from matplotlib import pyplot as plt # type: ignore
+from matplotlib import animation # type: ignore
 from Grafo import *
 from ACO import ACO
 
@@ -54,7 +54,7 @@ def main():
 	G.LinkNodes(Nodi[14], Nodi[12],1)
 	G.LinkNodes(Nodi[11], Nodi[14],1)
 	
-	simulazione=ACO(n_agenti, n_snaps, T_sim, freq_spawn, v0, rho, tau0, Q, G)
+	simulazione=ACO(n_agenti, T_sim, freq_spawn, v0, tau0, Q, G)
 	istanti=simulazione(n_snaps)
 
 	#Animazione
@@ -64,9 +64,6 @@ def main():
 	listaLinee=list()
 	listaFerormoni=list()
 	t_plt=list()
-	
-	xLines= [c[0] for c in coords]
-	yLines= [c[1] for c in coords]
 	
 	for a in G.Arcs:
 		l, =axGr.plot([], [],lw=2)
@@ -138,7 +135,8 @@ def main():
 		
 		return [points] + listaLinee
 
-	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0, init_func=init_plot)
+	axGr.set_title("Quantità di ferormoni sui rami")
+	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0, init_func=init_plot, save_count=200)
 	plt.show()
 	
 if(__name__ == "__main__"):

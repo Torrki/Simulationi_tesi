@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np # type: ignore
 
 class ArtificialAnt:	
 	def __init__(self, startNode):
