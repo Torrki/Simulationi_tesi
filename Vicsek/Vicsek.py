@@ -35,11 +35,21 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 		passi			è il numero di passi della simulazione
 		'''
 		statoVicsek=np.zeros((N*2,1))	#creo lo stato iniziale del sistema, che comprende solo le posizioni degli agenti
+		velocitaCM=np.zeros((2,1))
+		CM=np.zeros((2,1))
 		for i in range(N):
 			statoVicsek[[i*2,i*2+1]]=agenti[i].Posizione
+			velocitaCM += agenti[i].Orientamento * (v0/N)
+			CM += agenti[i].Posizione/N
 			
+		yield statoVicsek.copy(), velocitaCM.copy(), CM.copy(), 0
+		
 		#simulazione dei passi
-		for k in range(passi):
+		for k in range(1,passi+1):
+			velocitaCM[0][0]=0
+			velocitaCM[1][0]=0
+			CM[0][0]=0
+			CM[1][0]=0
 			for i in range(N):
 				i_stato=i*2
 				s_i=agenti[i].Orientamento
@@ -66,7 +76,11 @@ def Vicsek(T: float, density: float, v0: float, N:int, eta: float, beta: float, 
 				new_s /= np.linalg.norm(new_s)
 				agenti[i].Orientamento=new_s	#aggiornamento dell'orientamento degli agenti
 				
-			yield statoVicsek.copy()
+				#Calcolo vettore velocità del centro di massa
+				velocitaCM += agenti[i].Orientamento * (v0/N)
+				CM += agenti[i].Posizione / N
+				
+			yield statoVicsek.copy(), velocitaCM.copy(), CM.copy(), k
 	
 	return sistema
 
