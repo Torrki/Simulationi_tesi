@@ -18,6 +18,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 	Torna una funzione generatore
 	'''
 	seme_random=120
+	pScelto=1/2
 	velocitaMedia=1
 	deviazioneStd=0.01
 	gen=rnd.default_rng(seme_random) #Random Generator
@@ -46,7 +47,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 			if len(DizionarioVicini[u]) == 1:
 				break
 				
-			scelta=gen.choice([True, False], p=[1/2, 1/2])
+			scelta=gen.choice([True, False], p=[1-pScelto, pScelto])
 			if(scelta):
 				DizionarioVicini[u] -= {uv}
 
@@ -60,7 +61,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 	def sistema(n_snaps):
 		'''
 		Funzione per la simulazione del modello PSO
-		passi			è il numero di passi della simulazione
+		passi		è il numero di passi della simulazione
 		'''
 		#Definizione valori autovalori nel tempo
 		def Autovalore(a_min, a_max):
@@ -77,7 +78,9 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 			del Uccelli[u].PosizioneMiglioreGlobale
 			Uccelli[u].PosizioneMiglioreGlobale=AgenteMigliore.Posizione.copy()
 
-		for p in range(n_snaps):
+		yield statoPSO.copy()
+
+		for p in range(1, n_snaps+1):
 			autovaloreP=next(GenAutovalori)		
 			for u in range(n_agenti):
 				Ucc=Uccelli[u]

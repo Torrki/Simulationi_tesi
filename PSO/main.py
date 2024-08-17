@@ -55,7 +55,7 @@ def main():
 	n_snaps=int(argsCmd.n_snaps)
 	D_attr=float(argsCmd.D_attr)
 	
-	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, MinimiLocali, D_attr)
+	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, Paraboloide_0, D_attr)
 	istanti=simulazione(n_snaps)
 	
 	#Animazione
