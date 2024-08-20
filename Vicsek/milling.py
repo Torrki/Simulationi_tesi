@@ -3,7 +3,7 @@ import argparse
 from matplotlib import pyplot as plt # type: ignore
 from matplotlib import animation # type: ignore
 from matplotlib.gridspec import GridSpec # type: ignore
-from Vicsek import Vicsek
+from VicsekMilling import Vicsek
 
 def main():
 	#parser per inserire la configurazione da linea di comando
@@ -29,7 +29,16 @@ def main():
 	R0=float(argsCmd.R0)
 	Dattr=float(argsCmd.D_attr)
 	
-	simulazione=Vicsek(T, densita, v0, n_agenti, eta_random, beta_attr, R0, Dattr, 0, 50)	
+	agenti1= int(n_agenti / 3)
+	agenti2= agenti1
+	agenti3 = n_agenti - (agenti1+agenti2)
+	
+	simulazione=Vicsek(T, densita, v0, agenti1, eta_random, beta_attr, R0, Dattr, 0, 60)
+	vicsek_2=Vicsek(T, densita, v0, agenti2, eta_random, beta_attr, R0, Dattr, -60, -60)
+	vicsek_3=Vicsek(T, densita, v0, agenti3, eta_random, beta_attr, R0, Dattr, 60, -60)
+	Vicsek.UnionVicsek(simulazione, vicsek_2)
+	Vicsek.UnionVicsek(simulazione, vicsek_3)
+	
 	istanti=simulazione(n_snaps)
 	
 	#Animazione
@@ -38,9 +47,18 @@ def main():
 	ax=fig.add_subplot(gs[:,0])
 	axGr=fig.add_subplot(gs[0,1])
 	axVel=fig.add_subplot(gs[1,1])
+	
+	lineeDirezioneAgenti=dict()
 	points, =ax.plot([], [], 'bo')
+	lunghezzaLinee=2
+	
+	for ag in simulazione.agenti:
+		l, =ax.plot([],[], lw=2, color='blue')
+		lineeDirezioneAgenti[ag]=l
+		
 	CMpoint, =ax.plot([], [], 'ro')
 	vecVel, =ax.plot([], [], lw=2, color='red')
+	
 	l, =axGr.plot([], [], lw=2)
 	lVel, =axVel.plot([], [], lw=2)
 	phase_plt=list()
@@ -67,7 +85,7 @@ def main():
 	
 	def update_points(dati):
 		global vecPrec, snaps
-		statoVicsek, velocitaVicsek, CMVicsek, t = dati
+		velocitaVicsek, CMVicsek, t = dati
 		x_plt=list()
 		y_plt=list()
 		faseVelVec=np.arctan2(velocitaVicsek[1][0], velocitaVicsek[0][0])
@@ -75,9 +93,7 @@ def main():
 		if(t==0):
 			vecPrec=velocitaVicsek.copy()
 			phase_plt.append(faseVelVec)
-			snaps=statoVicsek
 		else:
-			snaps =np.concatenate((snaps, statoVicsek), axis=1)
 			normaVelPrec=np.linalg.norm(vecPrec)
 			normaVelocitaVicsek=np.linalg.norm(velocitaVicsek)
 			
@@ -92,9 +108,11 @@ def main():
 				
 			vecPrec=velocitaVicsek.copy()
 		
-		for i in range(n_agenti):
-			x_plt.append( statoVicsek[i*2][0] )
-			y_plt.append( statoVicsek[i*2+1][0] )
+		for ag in simulazione.agenti:
+			x_plt.append( ag.Posizione[0][0] )
+			y_plt.append( ag.Posizione[1][0] )	
+			
+			lineeDirezioneAgenti[ag].set_data( [ ag.Posizione[0][0], ag.Posizione[0][0]+lunghezzaLinee*ag.Orientamento[0][0] ],[ ag.Posizione[1][0], ag.Posizione[1][0]+lunghezzaLinee*ag.Orientamento[1][0] ] )		
 			
 		moduloVelVec=np.linalg.norm(velocitaVicsek)
 		vel_plt.append(moduloVelVec)
@@ -160,12 +178,12 @@ def main():
 		lVel.set_data(t_plt, vel_plt)
 		CMpoint.set_data([xVec[0]], [yVec[0]])
 	
-		return points, vecVel, l, lVel
+		return points, vecVel, l, lVel, lineeDirezioneAgenti
 	
 	axGr.set_title("Fase vettore velocità CM")
 	axVel.set_title("Modulo vettore velocità CM")
 	
-	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, init_func=init_plot, save_count=200)
+	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, init_func=init_plot, save_count=200, repeat=False)
 	plt.show()
 	
 if __name__=="__main__":

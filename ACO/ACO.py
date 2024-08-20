@@ -17,25 +17,6 @@ def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, rho: flo
 
 	Torna una funzione generatore
 	'''
-	Nido=Grafo.Nido
-	NodoCibo=Grafo.NodoCibo
-
-	Formiche={AA.ArtificialAnt(Nido) for f in range(n_agenti)}
-
-	for a in Grafo.Arcs:
-		a.TassoEvaporazione=rho
-		a.Ferormoni=tau0
-		a.RilascioFormiche=0
-		a.Alpha=alpha
-		a.Beta=beta
-		a.Euristica=euristic(a, NodoCibo)
-
-		lunghezzaTratto = np.linalg.norm( a.Nodi[1].Posizione-a.Nodi[0].Posizione )
-		#Usare come costo il tempo impiegato
-		#a.Costo=lunghezzaTratto/V
-		#Usare come costo la distanza 
-		a.Costo=lunghezzaTratto
-
 	def sistema(passi : int):
 		'''
 		Funzione per la simulazione del modello ACO
@@ -125,5 +106,25 @@ def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, rho: flo
 				statoFerormoni[a][0]=listaStatiFerormoni[a].Ferormoni
 				
 			yield statoACO.copy(), statoFerormoni.copy(), p
+			
+	Nido=Grafo.Nido
+	NodoCibo=Grafo.NodoCibo
+
+	Formiche={AA.ArtificialAnt(Nido) for f in range(n_agenti)}
+
+	for a in Grafo.Arcs:
+		a.TassoEvaporazione=rho
+		a.Ferormoni=tau0
+		a.RilascioFormiche=0
+		a.Alpha=alpha
+		a.Beta=beta
+		a.Euristica=euristic(a, NodoCibo)
+
+		lunghezzaTratto = np.linalg.norm( a.Nodi[1].Posizione-a.Nodi[0].Posizione )
+		#Usare come costo il tempo impiegato
+		#a.Costo=lunghezzaTratto/V
+		#Usare come costo la distanza 
+		a.Costo=lunghezzaTratto
+		
 	return sistema
 		

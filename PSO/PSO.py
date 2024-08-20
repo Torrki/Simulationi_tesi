@@ -17,47 +17,6 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 	
 	Torna una funzione generatore
 	'''
-	seme_random=120
-	pScelto=1/2
-	velocitaMedia=1
-	deviazioneStd=0.01
-	gen=rnd.default_rng(seme_random) #Random Generator
-	L=n_agenti/(2.0*densita) #Raddoppio perchè lo spazio va da -L a L, dunque in lunghezza 2L
-	AB.EvalFunction=fEval
-	
-	posizioniIniziali=gen.uniform(low=-L, high=L, size=(n_agenti,2))
-	angoliIniziali=gen.uniform(high=2*np.pi, size=(1,n_agenti))
-	orientamentiIniziali=np.array( [np.cos(angoliIniziali[0]),np.sin(angoliIniziali[0])] )
-
-	moduliVelocitaIniziali=gen.normal(loc=velocitaMedia, scale=deviazioneStd, size=(1,n_agenti))
-	moduliVelocitaIniziali = np.concatenate((moduliVelocitaIniziali, moduliVelocitaIniziali))
-	velocitaIniziali=(moduliVelocitaIniziali*orientamentiIniziali).T
-
-	Uccelli=[AB(posizioniIniziali[i], velocitaIniziali[i]) for i in range(n_agenti)]
-	
-	#del posizioniIniziali, angoliIniziali, orientamentiIniziali, moduliVelocitaIniziali, velocitaIniziali
-
-	#Definizione topologia
-	DizionarioVicini = dict()
-	for u in Uccelli:
-		I=set(Uccelli)-{u}	
-		DizionarioVicini[u]=set(Uccelli)-{u}
-		
-		for uv in I:
-			if len(DizionarioVicini[u]) == 1:
-				break
-				
-			scelta=gen.choice([True, False], p=[1-pScelto, pScelto])
-			if(scelta):
-				DizionarioVicini[u] -= {uv}
-
-		u.Vicini = DizionarioVicini[u]
-
-	InsiemeValutazioni={(u,AB.EvalFunction(u.Posizione[0][0], u.Posizione[1][0])) for u in Uccelli}
-	valutazioneMax=max(InsiemeValutazioni, key=lambda coppia: coppia[1])[1]
-	InsiemeMigliori={coppia[0] for coppia in InsiemeValutazioni if coppia[1]==valutazioneMax}
-	AgenteMigliore=InsiemeMigliori.pop()
-
 	def sistema(n_snaps):
 		'''
 		Funzione per la simulazione del modello PSO
@@ -69,7 +28,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 			while(t <= n_snaps):
 				yield a_max - (a_max-a_min)*(t/n_snaps)
 				t += 1
-		
+					
 		GenAutovalori=Autovalore(1,1.5)
 		statoPSO=np.zeros((n_agenti*2,1))
 		for u in range(len(Uccelli)):
@@ -81,7 +40,8 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 		yield statoPSO.copy()
 
 		for p in range(1, n_snaps+1):
-			autovaloreP=next(GenAutovalori)		
+			autovaloreP=next(GenAutovalori)
+								
 			for u in range(n_agenti):
 				Ucc=Uccelli[u]
 				
@@ -119,5 +79,46 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 				u1.PosizioneMiglioreGlobale=UccMigliore.Posizione.copy()
 				
 			yield statoPSO.copy()
+			
+	seme_random=120
+	pScelto=1/2
+	velocitaMedia=1
+	deviazioneStd=0.01
+	gen=rnd.default_rng(seme_random) #Random Generator
+	L=n_agenti/(2.0*densita) #Raddoppio perchè lo spazio va da -L a L, dunque in lunghezza 2L
+	AB.EvalFunction=fEval
+	
+	posizioniIniziali=gen.uniform(low=-L, high=L, size=(n_agenti,2))
+	angoliIniziali=gen.uniform(high=2*np.pi, size=(1,n_agenti))
+	orientamentiIniziali=np.array( [np.cos(angoliIniziali[0]),np.sin(angoliIniziali[0])] )
+
+	moduliVelocitaIniziali=gen.normal(loc=velocitaMedia, scale=deviazioneStd, size=(1,n_agenti))
+	moduliVelocitaIniziali = np.concatenate((moduliVelocitaIniziali, moduliVelocitaIniziali))
+	velocitaIniziali=(moduliVelocitaIniziali*orientamentiIniziali).T
+
+	Uccelli=[AB(posizioniIniziali[i], velocitaIniziali[i]) for i in range(n_agenti)]
+	
+	del posizioniIniziali, angoliIniziali, orientamentiIniziali, moduliVelocitaIniziali, velocitaIniziali
+
+	#Definizione topologia
+	DizionarioVicini = dict()
+	for u in Uccelli:
+		I=set(Uccelli)-{u}	
+		DizionarioVicini[u]=set(Uccelli)-{u}
+		
+		for uv in I:
+			if len(DizionarioVicini[u]) == 1:
+				break
+				
+			scelta=gen.choice([True, False], p=[1-pScelto, pScelto])
+			if(scelta):
+				DizionarioVicini[u] -= {uv}
+
+		u.Vicini = DizionarioVicini[u]
+
+	InsiemeValutazioni={(u,AB.EvalFunction(u.Posizione[0][0], u.Posizione[1][0])) for u in Uccelli}
+	valutazioneMax=max(InsiemeValutazioni, key=lambda coppia: coppia[1])[1]
+	InsiemeMigliori={coppia[0] for coppia in InsiemeValutazioni if coppia[1]==valutazioneMax}
+	AgenteMigliore=InsiemeMigliori.pop()
 	return sistema
 

@@ -6,3 +6,4 @@ simulazione #2:
 	
 simulazione #3:
 	python3 main.py 30 800 0.01 12 4 2 0.01 5 4
+

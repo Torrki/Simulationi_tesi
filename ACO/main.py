@@ -167,7 +167,7 @@ def main():
 
 		return [points] + listaRet
 	
-	anim =animation.FuncAnimation(fig, func=update_figure, frames=istanti, init_func=init_plot, save_count=200, interval=T_sim*1000)
+	anim =animation.FuncAnimation(fig, func=update_figure, frames=istanti, init_func=init_plot, save_count=200, interval=T_sim*1000, repeat=False)
 	plt.show()
 	
 if(__name__ == "__main__"):
