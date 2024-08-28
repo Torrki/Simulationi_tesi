@@ -2,7 +2,7 @@ import numpy as np # type: ignore
 import numpy.random as rnd # type: ignore
 from ActiveAgent import ActiveAgent
 
-def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int, x0=0, y0=0): #funzione wrapper per configurare la simulazione
+def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int, x0=0, y0=0): #funzione wrapper per configurare la simulazione
 	'''
 	Funzione per la configurazione di un modello Vicsek:
 	T 			è il periodo di osservazione
@@ -28,7 +28,7 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 		statoVicsek=np.zeros((N*2,1))
 		velocitaCM=np.zeros((2,1))
 		CM=np.zeros((2,1))
-		R=10
+		R=20
 		
 		#Calcolo CM
 		for i in range(N):
@@ -134,5 +134,5 @@ def UnionVicsek(vic_1, vic_2):
 	vic_1.agenti |= vic_2.agenti
 	del vic_2
 	
-Vicsek.UnionVicsek=UnionVicsek
+VicsekMilling.UnionVicsek=UnionVicsek
 

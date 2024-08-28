@@ -3,7 +3,7 @@ import argparse
 from matplotlib import pyplot as plt # type: ignore
 from matplotlib import animation # type: ignore
 from matplotlib.gridspec import GridSpec # type: ignore
-from VicsekMilling import Vicsek
+from VicsekMilling import VicsekMilling
 
 def main():
 	#parser per inserire la configurazione da linea di comando
@@ -33,11 +33,11 @@ def main():
 	agenti2= agenti1
 	agenti3 = n_agenti - (agenti1+agenti2)
 	
-	simulazione=Vicsek(T, densita, v0, agenti1, eta_random, beta_attr, R0, Dattr, 0, 60)
-	vicsek_2=Vicsek(T, densita, v0, agenti2, eta_random, beta_attr, R0, Dattr, -60, -60)
-	vicsek_3=Vicsek(T, densita, v0, agenti3, eta_random, beta_attr, R0, Dattr, 60, -60)
-	Vicsek.UnionVicsek(simulazione, vicsek_2)
-	Vicsek.UnionVicsek(simulazione, vicsek_3)
+	simulazione=VicsekMilling(T, densita, v0, agenti1, eta_random, beta_attr, R0, Dattr, 0, 60)
+	vicsek_2=VicsekMilling(T, densita, v0, agenti2, eta_random, beta_attr, R0, Dattr, -60, -60)
+	vicsek_3=VicsekMilling(T, densita, v0, agenti3, eta_random, beta_attr, R0, Dattr, 60, -60)
+	VicsekMilling.UnionVicsek(simulazione, vicsek_2)
+	VicsekMilling.UnionVicsek(simulazione, vicsek_3)
 	
 	istanti=simulazione(n_snaps)
 	

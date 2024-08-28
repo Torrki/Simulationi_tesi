@@ -41,13 +41,19 @@ def main():
 	points, =ax.plot([], [], 'bo')
 	CMpoint, =ax.plot([], [], 'ro')
 	vecVel, =ax.plot([], [], lw=2, color='red')
-	l, =axGr.plot([], [], lw=2)
+	lPhase, =axGr.plot([], [], lw=2)
 	lVel, =axVel.plot([], [], lw=2)
 	phase_plt=list()
 	t_plt=list()
 	vel_plt=list()
 	vecPrec=None
-	snaps=None
+	
+	lineeDirezioneAgenti=dict()
+	lunghezzaLinee=3
+	
+	for ag in simulazione.agenti:
+		l, =ax.plot([],[], lw=2, color='blue')
+		lineeDirezioneAgenti[ag]=l
 	
 	def init_plot():
 		L=n_agenti/(2.0*densita)
@@ -60,14 +66,14 @@ def main():
 		axVel.set_ylim([0, 10])	
 		del t_plt[:], phase_plt[:], vel_plt[:]
 		
-		l.set_data(t_plt, phase_plt)
+		lPhase.set_data(t_plt, phase_plt)
 		lVel.set_data(t_plt, vel_plt)
 		
-		return l, lVel
+		return lPhase, lVel
 	
 	def update_points(dati):
-		global vecPrec, snaps
-		statoVicsek, velocitaVicsek, CMVicsek, t = dati
+		global vecPrec
+		velocitaVicsek, CMVicsek, t = dati
 		x_plt=list()
 		y_plt=list()
 		faseVelVec=np.arctan2(velocitaVicsek[1][0], velocitaVicsek[0][0])
@@ -75,9 +81,7 @@ def main():
 		if(t==0):
 			vecPrec=velocitaVicsek.copy()
 			phase_plt.append(faseVelVec)
-			snaps=statoVicsek
 		else:
-			snaps =np.concatenate((snaps, statoVicsek), axis=1)
 			normaVelPrec=np.linalg.norm(vecPrec)
 			normaVelocitaVicsek=np.linalg.norm(velocitaVicsek)
 			
@@ -92,9 +96,10 @@ def main():
 				
 			vecPrec=velocitaVicsek.copy()
 		
-		for i in range(n_agenti):
-			x_plt.append( statoVicsek[i*2][0] )
-			y_plt.append( statoVicsek[i*2+1][0] )
+		for ag in simulazione.agenti:
+			x_plt.append( ag.Posizione[0][0] )
+			y_plt.append( ag.Posizione[1][0] )
+			lineeDirezioneAgenti[ag].set_data( [ ag.Posizione[0][0], ag.Posizione[0][0]+lunghezzaLinee*ag.Orientamento[0][0] ],[ ag.Posizione[1][0], ag.Posizione[1][0]+lunghezzaLinee*ag.Orientamento[1][0] ] )	
 			
 		moduloVelVec=np.linalg.norm(velocitaVicsek)
 		vel_plt.append(moduloVelVec)
@@ -156,16 +161,16 @@ def main():
 		xVec=(CMVicsek[0][0], CMVicsek[0][0]+moduloVelVec*np.cos(faseVelVec))
 		yVec=(CMVicsek[1][0], CMVicsek[1][0]+moduloVelVec*np.sin(faseVelVec))
 		vecVel.set_data(xVec, yVec)
-		l.set_data(t_plt, phase_plt)
+		lPhase.set_data(t_plt, phase_plt)
 		lVel.set_data(t_plt, vel_plt)
 		CMpoint.set_data([xVec[0]], [yVec[0]])
 	
-		return points, vecVel, l, lVel
+		return points, vecVel, lPhase, lVel
 	
 	axGr.set_title("Fase vettore velocità CM")
 	axVel.set_title("Modulo vettore velocità CM")
 	
-	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, init_func=init_plot, save_count=200)
+	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, init_func=init_plot, save_count=200, repeat=False)
 	plt.show()
 	
 if __name__=="__main__":

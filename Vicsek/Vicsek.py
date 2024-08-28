@@ -22,16 +22,13 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 		passi			è il numero di passi della simulazione
 		'''	
 		agenti=list(sistema.agenti)
-		
-		statoVicsek=np.zeros((N*2,1))
 		velocitaCM=np.zeros((2,1))
 		CM=np.zeros((2,1))
-		for i in range(N):
-			statoVicsek[[i*2,i*2+1]]=agenti[i].Posizione
-			velocitaCM += agenti[i].Orientamento * (agenti[i].Velocita/N)
-			CM += agenti[i].Posizione/N
+		for ag in sistema.agenti:
+			velocitaCM += ag.Orientamento * (ag.Velocita/N)
+			CM += ag.Posizione/N
 			
-		yield statoVicsek.copy(), velocitaCM.copy(), CM.copy(), 0
+		yield velocitaCM.copy(), CM.copy(), 0
 		
 		#simulazione dei passi
 		for k in range(1,passi+1):
@@ -40,26 +37,23 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 			CM[0][0]=0
 			CM[1][0]=0
 			
-			for i in range(N):
-				i_stato=i*2
-				s_i=agenti[i].Orientamento
-				
-				dP=T*agenti[i].Velocita*s_i
-				agenti[i].Posizione += dP
-				statoVicsek[[i_stato,i_stato+1]]+=dP
+			for ag in sistema.agenti:
+				s_i=ag.Orientamento
+				dP=T*ag.Velocita*s_i
+				ag.Posizione += dP
 				
 				s_vicini=np.zeros((2,1)) #vettore medio della direzione dei vicini, compreso anche l'agente i-esimo
 				forzaAttrazioneAgenti=np.zeros((2,1))
-				for j in range(N):
-					if(agenti[i].inBound(agenti[j])):
-						dist_ij=agenti[j].Posizione-agenti[i].Posizione		#Quando i==j è un vettore nullo, la forza è automaticamente annullata e viene inserito solo l'orientamento dell'agente stesso
+				for ag_vicino in sistema.agenti:
+					if(ag.inBound(ag_vicino)):
+						dist_ij=ag_vicino.Posizione-ag.Posizione		#Quando i==j è un vettore nullo, la forza è automaticamente annullata e viene inserito solo l'orientamento dell'agente stesso
 						normaDistanza=np.linalg.norm(dist_ij)
 						if(normaDistanza >= 1e-2):
 							dist_ij /= normaDistanza
 						
-						forzaAttrazione_ij = beta*np.power( (int(normaDistanza) - Dattr), 3)*dist_ij
+						forzaAttrazione_ij = beta*np.power( (int(normaDistanza) - Dattr), 1)*dist_ij
 						forzaAttrazioneAgenti += forzaAttrazione_ij
-						s_vicini += agenti[j].Orientamento
+						s_vicini += ag_vicino.Orientamento
 				
 				rumore_x=gen.standard_normal(size=(1,1))
 				rumore_y=gen.standard_normal(size=(1,1))
@@ -71,13 +65,13 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 				if(normaNew_s >= 1):
 					new_s /= normaNew_s
 					
-				agenti[i].Orientamento=new_s	#aggiornamento dell'orientamento degli agenti
+				ag.Orientamento=new_s	#aggiornamento dell'orientamento degli agenti
 
 				#Calcolo vettore velocità del centro di massa
-				velocitaCM += agenti[i].Orientamento * (agenti[i].Velocita/N)
-				CM += agenti[i].Posizione / N
+				velocitaCM += ag.Orientamento * (ag.Velocita/N)
+				CM += ag.Posizione / N
 				
-			yield statoVicsek.copy(), velocitaCM.copy(), CM.copy(), k
+			yield velocitaCM.copy(), CM.copy(), k
 			
 	ActiveAgent.raggioIntorno=float(R0)
 	sistema.seme_random=10
@@ -91,26 +85,6 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 	orientamentiIniziali=np.array( [ np.cos(angoliIniziali[0]),np.sin(angoliIniziali[0]) ], dtype=np.dtype(float) ).T
 																	
 	sistema.agenti= { ActiveAgent(posizioniIniziali[k], orientamentiIniziali[k], v0 ) for k in range(N)} #creazione degli N agenti con gli stati iniziali
-	
-	def Get(par):
-		if(par=="T"):
-			return T
-		elif(par=="densita"):
-			return densita
-		elif(par=="v0"):
-			return v0
-		elif(par=="N"):
-			return N
-		elif(par=="eta"):
-			return eta
-		elif(par=="beta"):
-			return beta
-		elif(par=="R0"):
-			return R0
-		elif(par=="Dattr"):
-			return Dattr
-		else:
-			return None
 	
 	del posizioniIniziali, angoliIniziali, orientamentiIniziali
 	return sistema	
