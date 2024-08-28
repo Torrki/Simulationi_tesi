@@ -2,6 +2,11 @@ from ArtificialBird import ArtificialBird as AB
 import numpy as np # type: ignore
 from numpy import random as rnd # type: ignore
 
+def Normalizzazione(vec):
+	angolo=np.arctan2(vec[1][0], vec[0][0])
+	vec[0][0]=np.cos(angolo)
+	vec[1][0]=np.sin(angolo)
+
 def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_attr):
 	'''
 	Funzione per la configurazione di un modello PSO:
@@ -49,8 +54,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 				for uv in Ucc.Vicini:
 					distanza = uv.Posizione-Ucc.Posizione
 					normaDistanza=np.linalg.norm(distanza)
-					if(normaDistanza > 1):
-						distanza /= normaDistanza
+					Normalizzazione(distanza)
 						
 					fAttrazione += (normaDistanza - D_attr)*distanza
 				

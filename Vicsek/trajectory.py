@@ -14,8 +14,8 @@ def SineTrajectory(passi: int, T_sim: float):
 		
 def CircularTrajectory(passi: int, T_sim: float):
 	for p in range(passi):
-		y=np.sin(4*p*T_sim)
-		x=np.cos(4*p*T_sim)
+		y=np.sin(p*T_sim)
+		x=np.cos(p*T_sim)
 		
 		yield np.array([[x],[y]], dtype=np.dtype(float))
 		
@@ -59,7 +59,7 @@ def main():
 	R0=float(argsCmd.R0)
 	Dattr=float(argsCmd.D_attr)
 	
-	simulazione=Vicsek(T, densita, v0, n_agenti, eta_random, beta_attr, R0, Dattr, traj=SpiralTrajectory(n_snaps, T, v0), lamb=3)	
+	simulazione=Vicsek(T, densita, v0, n_agenti, eta_random, beta_attr, R0, Dattr, traj=CircularTrajectory(n_snaps, T), lamb=10)	
 	istanti=simulazione(n_snaps)
 	
 	#Animazione

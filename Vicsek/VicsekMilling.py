@@ -2,6 +2,11 @@ import numpy as np # type: ignore
 import numpy.random as rnd # type: ignore
 from ActiveAgent import ActiveAgent
 
+def Normalizzazione(vec):
+	angolo=np.arctan2(vec[1][0], vec[0][0])
+	vec[0][0]=np.cos(angolo)
+	vec[1][0]=np.sin(angolo)
+
 def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int, x0=0, y0=0): #funzione wrapper per configurare la simulazione
 	'''
 	Funzione per la configurazione di un modello Vicsek:
@@ -38,10 +43,8 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 		
 		#Calcolo velocità CM e orientamento degli agenti verso CM
 		for i in range(N):
-			dist_iCM = PCollisione-agenti[i].Posizione
-			normaDistCM = np.linalg.norm(dist_iCM)			
-			if(normaDistCM >= 1e-2):
-				dist_iCM /= normaDistCM
+			dist_iCM = PCollisione-agenti[i].Posizione	
+			Normalizzazione(dist_iCM)
 				
 			agenti[i].Orientamento = dist_iCM
 			velocitaCM += agenti[i].Orientamento * (agenti[i].Velocita/N)
@@ -70,9 +73,7 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 					if( agenti[i].inBound(agenti[j]) ):
 						dist_ij=agenti[j].Posizione-agenti[i].Posizione		#Quando i==j è un vettore nullo, la forza è automaticamente annullata e viene inserito solo l'orientamento dell'agente stesso
 						normaDistanza=np.linalg.norm(dist_ij)
-						
-						if(normaDistanza >= 1):
-							dist_ij /= normaDistanza
+						Normalizzazione(dist_ij)
 						
 						forzaAttrazione_ij = beta*(int(normaDistanza) - Dattr)*dist_ij
 						forzaAttrazioneAgenti += forzaAttrazione_ij
@@ -80,8 +81,7 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 						
 				dist_ijCM=PCollisione - agenti[i].Posizione
 				moduloDistanzaCM = np.linalg.norm(dist_ijCM)
-				if(moduloDistanzaCM >= 1):
-					dist_ijCM /= moduloDistanzaCM
+				Normalizzazione(dist_ijCM)
 					
 				#Rotazione forza CM
 				angolo=( -1 / ( np.power(moduloDistanzaCM - R,2) + 1 ) )*np.pi/2
@@ -92,17 +92,14 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 				rumore_x=gen.standard_normal(size=(1,1))
 				rumore_y=gen.standard_normal(size=(1,1))
 				rumore=np.array([ [rumore_x[0][0]], [rumore_y[0][0]] ], dtype=np.dtype(float))
-				rumore /= np.linalg.norm(rumore)
+				Normalizzazione(rumore)
 				
 				versoreforzaCM = dist_ijCM+dist_ijCM_Rot
-				normaVersoreforzaCM = np.linalg.norm(versoreforzaCM)
-				if(normaVersoreforzaCM >= 1):
-					versoreforzaCM /= normaVersoreforzaCM
+				Normalizzazione(versoreforzaCM)
 				
 				new_s=s_vicini+ eta*rumore + forzaAttrazioneAgenti + 2*forzaCM*versoreforzaCM
-				normaNew_s=np.linalg.norm(new_s)
-				if(normaNew_s >= 1):
-					new_s /= normaNew_s
+				Normalizzazione(new_s)
+				
 				agenti[i].Orientamento=new_s
 				
 				#Calcolo vettore velocità del CM

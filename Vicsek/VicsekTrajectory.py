@@ -2,6 +2,11 @@ import numpy as np # type: ignore
 import numpy.random as rnd # type: ignore
 from ActiveAgent import ActiveAgent
 
+def Normalizzazione(vec):
+	angolo=np.arctan2(vec[1][0], vec[0][0])
+	vec[0][0]=np.cos(angolo)
+	vec[1][0]=np.sin(angolo)
+
 def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int, x0=0, y0=0, traj=np.zeros((2,1)), lamb=1): #funzione wrapper per configurare la simulazione
 	'''
 	Funzione per la configurazione di un modello Vicsek:
@@ -44,14 +49,16 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 				dP=T*ag.Velocita*s_i
 				ag.Posizione += dP
 				
-				s_vicini=np.zeros((2,1)) #vettore medio della direzione dei vicini, compreso anche l'agente i-esimo
+				#Calcolo della direzione dei vicini e della forza di attrazione
+				s_vicini=np.zeros((2,1))
 				forzaAttrazioneAgenti=np.zeros((2,1))
 				for ag_vicino in sistema.agenti:
 					if(ag.inBound(ag_vicino)):
-						dist_ij=ag_vicino.Posizione-ag.Posizione		#Quando i==j è un vettore nullo, la forza è automaticamente annullata e viene inserito solo l'orientamento dell'agente stesso
+						dist_ij=ag_vicino.Posizione-ag.Posizione #Quando i==j è un vettore nullo, la forza è automaticamente annullata e viene inserito solo l'orientamento dell'agente stesso
 						normaDistanza=np.linalg.norm(dist_ij)
-						if(normaDistanza >= 1e-2):
-							dist_ij /= normaDistanza
+						
+						#Normalizzazione tramite il calcolo dell'angolo e creazione di un vettore con la stessa direzione a norma unitaria
+						Normalizzazione(dist_ij)
 						
 						forzaAttrazione_ij = beta*(int(normaDistanza) - Dattr)*dist_ij
 						forzaAttrazioneAgenti += forzaAttrazione_ij
@@ -60,21 +67,21 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 				rumore_x=gen.standard_normal(size=(1,1))
 				rumore_y=gen.standard_normal(size=(1,1))
 				rumore=np.array([ [rumore_x[0][0]], [rumore_y[0][0]] ], dtype=np.dtype(float))
-				rumore /= np.linalg.norm(rumore)
+				Normalizzazione(rumore)
 				
-				new_s=s_vicini+ eta*rumore + forzaAttrazioneAgenti +lamb*(traj_k-s_i)
-				normaNew_s=np.linalg.norm(new_s)
-				if(normaNew_s >= 1):
-					new_s /= normaNew_s
+				new_s=s_vicini + eta*rumore + forzaAttrazioneAgenti + lamb*(traj_k-s_i)
+				Normalizzazione(new_s)
 					
-				ag.Orientamento=new_s	#aggiornamento dell'orientamento degli agenti
+				#Aggiornamento orientamento agenti
+				ag.Orientamento=new_s
 
 				#Calcolo vettore velocità del centro di massa
 				velocitaCM += ag.Orientamento * (ag.Velocita/N)
 				CM += ag.Posizione / N
 				
 			yield velocitaCM.copy(), CM.copy(), k
-			
+
+	#Creazione stato iniziale del sistema			
 	ActiveAgent.raggioIntorno=float(R0)
 	sistema.seme_random=10
 	gen=rnd.default_rng(sistema.seme_random) #Random Generator

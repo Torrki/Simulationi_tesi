@@ -2,6 +2,11 @@ import numpy as np # type: ignore
 import numpy.random as rnd # type: ignore
 from ActiveAgent import ActiveAgent
 
+def Normalizzazione(vec):
+	angolo=np.arctan2(vec[1][0], vec[0][0])
+	vec[0][0]=np.cos(angolo)
+	vec[1][0]=np.sin(angolo)
+
 def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int, x0=0, y0=0): #funzione wrapper per configurare la simulazione
 	'''
 	Funzione per la configurazione di un modello Vicsek:
@@ -48,8 +53,7 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 					if(ag.inBound(ag_vicino)):
 						dist_ij=ag_vicino.Posizione-ag.Posizione		#Quando i==j è un vettore nullo, la forza è automaticamente annullata e viene inserito solo l'orientamento dell'agente stesso
 						normaDistanza=np.linalg.norm(dist_ij)
-						if(normaDistanza >= 1e-2):
-							dist_ij /= normaDistanza
+						Normalizzazione(dist_ij)
 						
 						forzaAttrazione_ij = beta*np.power( (int(normaDistanza) - Dattr), 1)*dist_ij
 						forzaAttrazioneAgenti += forzaAttrazione_ij
@@ -58,14 +62,13 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 				rumore_x=gen.standard_normal(size=(1,1))
 				rumore_y=gen.standard_normal(size=(1,1))
 				rumore=np.array([ [rumore_x[0][0]], [rumore_y[0][0]] ], dtype=np.dtype(float))
-				rumore /= np.linalg.norm(rumore)
+				Normalizzazione(rumore)
 				
 				new_s=s_vicini+ eta*rumore + forzaAttrazioneAgenti
-				normaNew_s=np.linalg.norm(new_s)
-				if(normaNew_s >= 1):
-					new_s /= normaNew_s
-					
-				ag.Orientamento=new_s	#aggiornamento dell'orientamento degli agenti
+				Normalizzazione(new_s)
+				
+				#Aggiornamento orientamento agenti
+				ag.Orientamento=new_s
 
 				#Calcolo vettore velocità del centro di massa
 				velocitaCM += ag.Orientamento * (ag.Velocita/N)
