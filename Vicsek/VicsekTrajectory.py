@@ -33,16 +33,18 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 		for ag in sistema.agenti:
 			velocitaCM += ag.Orientamento * (ag.Velocita/N)
 			CM += ag.Posizione/N
-			
+
 		yield velocitaCM.copy(), CM.copy(), 0
 		
 		#simulazione dei passi
 		for k in range(1,passi+1):
+			traj_k_pos =next(traj)
+			erroreCM = traj_k_pos - CM
+			
 			velocitaCM[0][0]=0
 			velocitaCM[1][0]=0
 			CM[0][0]=0
 			CM[1][0]=0
-			traj_k=next(traj)
 			
 			for ag in sistema.agenti:
 				s_i=ag.Orientamento
@@ -69,7 +71,7 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 				rumore=np.array([ [rumore_x[0][0]], [rumore_y[0][0]] ], dtype=np.dtype(float))
 				Normalizzazione(rumore)
 				
-				new_s=s_vicini + eta*rumore + forzaAttrazioneAgenti + lamb*(traj_k-s_i)
+				new_s=s_vicini + eta*rumore + forzaAttrazioneAgenti + lamb*(erroreCM)
 				Normalizzazione(new_s)
 					
 				#Aggiornamento orientamento agenti

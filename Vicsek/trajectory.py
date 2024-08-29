@@ -3,36 +3,31 @@ import argparse
 from matplotlib import pyplot as plt # type: ignore
 from matplotlib import animation # type: ignore
 from matplotlib.gridspec import GridSpec # type: ignore
-from VicsekTrajectory import Vicsek
+from VicsekTrajectory import Vicsek, Normalizzazione
 
-def SineTrajectory(passi: int, T_sim: float):
+def SineTrajectory(passi: int, T_sim: float, v: float):
+	R=30
 	for p in range(passi):
-		y=np.sin(4*p*T_sim)
-		x=1.0
+		x=v*p*T_sim
+		y=R*np.sin(x/R)
 		
 		yield np.array([[x],[y]], dtype=np.dtype(float))
 		
-def CircularTrajectory(passi: int, T_sim: float):
+def CircularTrajectory(passi: int, T_sim: float, v: float):
+	R=10
 	for p in range(passi):
-		y=np.sin(p*T_sim)
-		x=np.cos(p*T_sim)
-		
-		yield np.array([[x],[y]], dtype=np.dtype(float))
-		
-def InfiniteTrajectory(passi: int, T_sim: float):
-	for p in range(passi):
-		y=np.sin(2*p*T_sim + np.pi/2)
-		x=np.cos(p*T_sim)
+		y=R*np.sin((v/R)*p*T_sim) + 100
+		x=R*np.cos((v/R)*p*T_sim)
 		
 		yield np.array([[x],[y]], dtype=np.dtype(float))
 		
 def SpiralTrajectory(passi: int, T_sim: float, v: float):
-	R=10
+	R=1e-2
 	for p in range(passi):
-		y=np.sin(2*(v/R)*p*T_sim)
-		x=np.cos(2*(v/R)*p*T_sim)
-		R += 0.01
+		y=R*np.sin((v/R)*p*T_sim)
+		x=R*np.cos((v/R)*p*T_sim)
 		
+		R += 1e-2
 		yield np.array([[x],[y]], dtype=np.dtype(float))
 
 def main():
@@ -59,7 +54,7 @@ def main():
 	R0=float(argsCmd.R0)
 	Dattr=float(argsCmd.D_attr)
 	
-	simulazione=Vicsek(T, densita, v0, n_agenti, eta_random, beta_attr, R0, Dattr, traj=CircularTrajectory(n_snaps, T), lamb=10)	
+	simulazione=Vicsek(T, densita, v0, n_agenti, eta_random, beta_attr, R0, Dattr, traj=CircularTrajectory(n_snaps, T, v0), lamb=1)	
 	istanti=simulazione(n_snaps)
 	
 	#Animazione
