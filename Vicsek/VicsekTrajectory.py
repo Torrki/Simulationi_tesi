@@ -1,11 +1,7 @@
 import numpy as np # type: ignore
 import numpy.random as rnd # type: ignore
 from ActiveAgent import ActiveAgent
-
-def Normalizzazione(vec):
-	angolo=np.arctan2(vec[1][0], vec[0][0])
-	vec[0][0]=np.cos(angolo)
-	vec[1][0]=np.sin(angolo)
+from utilities import Normalizzazione
 
 def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int, x0=0, y0=0, traj=np.zeros((2,1)), lamb=1): #funzione wrapper per configurare la simulazione
 	'''
@@ -62,7 +58,7 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 						#Normalizzazione tramite il calcolo dell'angolo e creazione di un vettore con la stessa direzione a norma unitaria
 						Normalizzazione(dist_ij)
 						
-						forzaAttrazione_ij = beta*(int(normaDistanza) - Dattr)*dist_ij
+						forzaAttrazione_ij = beta*(normaDistanza - Dattr)*dist_ij
 						forzaAttrazioneAgenti += forzaAttrazione_ij
 						s_vicini += ag_vicino.Orientamento
 				
@@ -71,10 +67,9 @@ def Vicsek(T: float, densita: float, v0: float, N:int, eta: float, beta: float, 
 				rumore=np.array([ [rumore_x[0][0]], [rumore_y[0][0]] ], dtype=np.dtype(float))
 				Normalizzazione(rumore)
 				
-				new_s=s_vicini + eta*rumore + forzaAttrazioneAgenti + lamb*(erroreCM)
-				Normalizzazione(new_s)
-					
 				#Aggiornamento orientamento agenti
+				new_s=s_vicini + eta*rumore + forzaAttrazioneAgenti + lamb*(erroreCM)
+				Normalizzazione(new_s)					
 				ag.Orientamento=new_s
 
 				#Calcolo vettore velocità del centro di massa

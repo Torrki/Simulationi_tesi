@@ -5,6 +5,8 @@ from matplotlib import animation # type: ignore
 from matplotlib.gridspec import GridSpec # type: ignore
 from Vicsek import Vicsek
 
+VelPrec=None
+
 def main():
 	#parser per inserire la configurazione da linea di comando
 	parser_args=argparse.ArgumentParser(description="Programma per la simulazione di un modello Vicsek", prog="Vicsek Sim")
@@ -46,7 +48,6 @@ def main():
 	phase_plt=list()
 	t_plt=list()
 	vel_plt=list()
-	vecPrec=None
 	
 	lineeDirezioneAgenti=dict()
 	lunghezzaLinee=3
@@ -55,6 +56,7 @@ def main():
 		l, =ax.plot([],[], lw=2, color='blue')
 		lineeDirezioneAgenti[ag]=l
 	
+	#Funzione per impostare il piano della simulazione
 	def init_plot():
 		L=n_agenti/(2.0*densita)
 		lim=L*2.0
@@ -71,41 +73,43 @@ def main():
 		
 		return lPhase, lVel
 	
+	#Funzione per aggiornare i punti
 	def update_points(dati):
-		global vecPrec
+		global VelPrec
+		
 		velocitaVicsek, CMVicsek, t = dati
 		x_plt=list()
 		y_plt=list()
-		faseVelVec=np.arctan2(velocitaVicsek[1][0], velocitaVicsek[0][0])
 		
-		if(t==0):
-			vecPrec=velocitaVicsek.copy()
-			phase_plt.append(faseVelVec)
-		else:
-			normaVelPrec=np.linalg.norm(vecPrec)
-			normaVelocitaVicsek=np.linalg.norm(velocitaVicsek)
-			
-			complVelPrec=complex(vecPrec[0][0], vecPrec[1][0])
-			complVelVicsek=complex(velocitaVicsek[0][0], velocitaVicsek[1][0])
-			if(complVelPrec != complex(0,0)):
-				complTrasformazione=complVelVicsek/complVelPrec
-				angolo=np.arctan2(complTrasformazione.imag, complTrasformazione.real)
-				phase_plt.append( phase_plt[-1] + angolo )
+		#Calcolo della nuova fase, se il vettore è nullo mantengo quella precedente
+		normaVelocitaVicsek=np.linalg.norm(velocitaVicsek)
+		faseVelVec=0 if t==0 else phase_plt[-1]
+		rotazione=0
+		
+		if(normaVelocitaVicsek > 0):
+			if(t==0):
+				faseVelVec=np.arctan2(velocitaVicsek[1][0], velocitaVicsek[0][0])
 			else:
-				phase_plt.append( phase_plt[-1] )
+				complVel=complex(velocitaVicsek[0][0], velocitaVicsek[1][0])
+				complVelPrec=complex(VelPrec[0][0], VelPrec[1][0])
+				rotazioneVel=complVel/complVelPrec
+				rotazione=np.arctan2(rotazioneVel.imag, rotazioneVel.real)
 				
-			vecPrec=velocitaVicsek.copy()
+		VelPrec=velocitaVicsek.copy()
+		phase_plt.append(faseVelVec+rotazione)
+		faseVelVec=phase_plt[-1]
 		
 		for ag in simulazione.agenti:
 			x_plt.append( ag.Posizione[0][0] )
 			y_plt.append( ag.Posizione[1][0] )
 			lineeDirezioneAgenti[ag].set_data( [ ag.Posizione[0][0], ag.Posizione[0][0]+lunghezzaLinee*ag.Orientamento[0][0] ],[ ag.Posizione[1][0], ag.Posizione[1][0]+lunghezzaLinee*ag.Orientamento[1][0] ] )	
 			
-		moduloVelVec=np.linalg.norm(velocitaVicsek)
-		vel_plt.append(moduloVelVec)
+		#Aggiunta della nuova velocità
+		vel_plt.append(normaVelocitaVicsek)
 		t *= T
 		t_plt.append(t)
 		
+		#Impostazione dei margini della finestra del piano
 		ax_xMin, ax_xMax = ax.get_xlim()
 		ax_yMin, ax_yMax = ax.get_ylim()
 		
@@ -131,6 +135,7 @@ def main():
 		fmin, fmax = axGr.get_ylim()
 		vmin, vmax = axVel.get_ylim()
 		
+		#Impostazione dei margini della finstra dei graficis
 		if(t >= tmax):
 			if(tmax >= 8.0):
 				tmax += 3.0
@@ -157,9 +162,10 @@ def main():
 			vmax *= 2
 			axVel.set_ylim([0, vmax])
 
+		#Aggiornamento punti e linee
 		points.set_data(x_plt,y_plt)
-		xVec=(CMVicsek[0][0], CMVicsek[0][0]+moduloVelVec*np.cos(faseVelVec))
-		yVec=(CMVicsek[1][0], CMVicsek[1][0]+moduloVelVec*np.sin(faseVelVec))
+		xVec=(CMVicsek[0][0], CMVicsek[0][0]+normaVelocitaVicsek*np.cos(faseVelVec))
+		yVec=(CMVicsek[1][0], CMVicsek[1][0]+normaVelocitaVicsek*np.sin(faseVelVec))
 		vecVel.set_data(xVec, yVec)
 		lPhase.set_data(t_plt, phase_plt)
 		lVel.set_data(t_plt, vel_plt)

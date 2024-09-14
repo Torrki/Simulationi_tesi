@@ -1,11 +1,7 @@
 import numpy as np # type: ignore
 import numpy.random as rnd # type: ignore
 from ActiveAgent import ActiveAgent
-
-def Normalizzazione(vec):
-	angolo=np.arctan2(vec[1][0], vec[0][0])
-	vec[0][0]=np.cos(angolo)
-	vec[1][0]=np.sin(angolo)
+from utilities import Normalizzazione
 
 def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: float, R0: int, Dattr: int, x0=0, y0=0): #funzione wrapper per configurare la simulazione
 	'''
@@ -30,7 +26,6 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 		agenti=list(sistema.agenti)
 		N=len(agenti)
 		
-		statoVicsek=np.zeros((N*2,1))
 		velocitaCM=np.zeros((2,1))
 		CM=np.zeros((2,1))
 		R=20
@@ -59,10 +54,7 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 			CM[1][0]=0
 			
 			for i in range(N):
-				#Aggiornamento stato
-				i_stato=i*2
 				s_i=agenti[i].Orientamento
-				
 				dP=T*agenti[i].Velocita*s_i
 				agenti[i].Posizione += dP
 				
@@ -75,7 +67,7 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 						normaDistanza=np.linalg.norm(dist_ij)
 						Normalizzazione(dist_ij)
 						
-						forzaAttrazione_ij = beta*(int(normaDistanza) - Dattr)*dist_ij
+						forzaAttrazione_ij = beta*(normaDistanza - Dattr)*dist_ij
 						forzaAttrazioneAgenti += forzaAttrazione_ij
 						s_vicini += agenti[j].Orientamento
 						
@@ -99,7 +91,6 @@ def VicsekMilling(T: float, densita: float, v0: float, N:int, eta: float, beta: 
 				
 				new_s=s_vicini+ eta*rumore + forzaAttrazioneAgenti + 2*forzaCM*versoreforzaCM
 				Normalizzazione(new_s)
-				
 				agenti[i].Orientamento=new_s
 				
 				#Calcolo vettore velocità del CM
