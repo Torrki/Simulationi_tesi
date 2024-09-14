@@ -12,8 +12,8 @@ def Cerchio(x,y, dx=0, dy=0):
 	return -np.power(circonferenza, 2) + 1
 	
 def Poli(x,y):
-	polo_x=np.power(np.power(x,2)-4,2)
-	polo_y=np.power(np.power(y,2)-4,2)
+	polo_x=np.power(np.power(x,2)-16,2)
+	polo_y=np.power(np.power(y,2)-16,2)
 	return -(polo_x+polo_y)
 
 def Paraboloide_0(x,y):
@@ -55,7 +55,7 @@ def main():
 	n_snaps=int(argsCmd.n_snaps)
 	D_attr=float(argsCmd.D_attr)
 	
-	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, Cerchio, D_attr)
+	simulazione=PSO(n_agenti, densita, v_max, T_sim, c1, c2, beta_attr, Paraboloide_0, D_attr)
 	istanti=simulazione(n_snaps)
 	
 	#Animazione
@@ -83,7 +83,7 @@ def main():
 	lim=L*1.3
 	axAn.set_xlim([-lim, lim])
 	axAn.set_ylim([-lim, lim])
-	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0, save_count=200, repeat=False)
+	anim=animation.FuncAnimation(fig, update_figure, frames=istanti, interval=T_sim*1000.0, save_count=200, repeat=True)
 	plt.show()
 	
 if(__name__ == "__main__"):

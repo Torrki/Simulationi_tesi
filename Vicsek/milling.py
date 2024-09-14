@@ -41,7 +41,7 @@ def main():
 	VicsekMilling.UnionVicsek(simulazione, vicsek_2)
 	VicsekMilling.UnionVicsek(simulazione, vicsek_3)
 	
-	istanti=simulazione(n_snaps)
+	istanti=simulazione(n_snaps, True)
 	
 	#Animazione
 	fig = plt.figure()
@@ -87,6 +87,21 @@ def main():
 		global VelPrec
 		
 		velocitaVicsek, CMVicsek, t = dati
+		
+		if(t==0):
+			L=n_agenti/(2.0*densita)
+			lim=L*2.0
+			ax.set_xlim([-lim, lim])
+			ax.set_ylim([-lim, lim])
+			axGr.set_xlim([0, 1])
+			axGr.set_ylim([-5, 5])
+			axVel.set_xlim([0, 1])
+			axVel.set_ylim([0, 10])	
+			del t_plt[:], phase_plt[:], vel_plt[:]
+			
+			l.set_data(t_plt, phase_plt)
+			lVel.set_data(t_plt, vel_plt)
+		
 		x_plt=list()
 		y_plt=list()
 		
@@ -182,7 +197,7 @@ def main():
 	axGr.set_title("Fase vettore velocità CM")
 	axVel.set_title("Modulo vettore velocità CM")
 	
-	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, init_func=init_plot, save_count=200, repeat=False)
+	anim=animation.FuncAnimation(fig, update_points, frames=istanti, interval=T*1000.0, init_func=init_plot, save_count=200, repeat=True)
 	plt.show()
 	
 if __name__=="__main__":

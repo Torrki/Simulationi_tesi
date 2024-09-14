@@ -122,9 +122,9 @@ def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, rho: flo
 
 		lunghezzaTratto = np.linalg.norm( a.Nodi[1].Posizione-a.Nodi[0].Posizione )
 		#Usare come costo il tempo impiegato
-		#a.Costo=lunghezzaTratto/V
+		a.Costo=lunghezzaTratto/V
 		#Usare come costo la distanza 
-		a.Costo=lunghezzaTratto
+		#a.Costo=lunghezzaTratto
 		
 	return sistema
 		

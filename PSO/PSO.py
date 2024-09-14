@@ -34,7 +34,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 				yield a_max - (a_max-a_min)*(t/n_snaps)
 				t += 1
 					
-		GenAutovalori=Autovalore(1,1.5)
+		GenAutovalori=Autovalore(0.9,1.5)
 		statoPSO=np.zeros((n_agenti*2,1))
 		for u in range(len(Uccelli)):
 			statoPSO[[u*2,u*2+1]]=Uccelli[u].Posizione
