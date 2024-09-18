@@ -66,9 +66,9 @@ def main():
 		x_plt=list()
 		y_plt=list()
 		
-		for i in range(n_agenti):
-			x_plt.append(statoPSO[i*2][0])
-			y_plt.append(statoPSO[i*2+1][0])
+		for ag in simulazione.agenti:
+			x_plt.append(ag.Posizione[0][0])
+			y_plt.append(ag.Posizione[1][0])
 		
 		y_min, y_max=(min(y_plt), max(y_plt))
 		x_min, x_max=(min(x_plt), max(x_plt))

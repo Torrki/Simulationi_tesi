@@ -35,14 +35,11 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 				t += 1
 					
 		GenAutovalori=Autovalore(0.9,1.5)
-		statoPSO=np.zeros((n_agenti*2,1))
-		for u in range(len(Uccelli)):
-			statoPSO[[u*2,u*2+1]]=Uccelli[u].Posizione
-			
+		for u in range(len(Uccelli)):			
 			del Uccelli[u].PosizioneMiglioreGlobale
 			Uccelli[u].PosizioneMiglioreGlobale=AgenteMigliore.Posizione.copy()
 
-		yield statoPSO.copy()
+		yield 0
 
 		for p in range(1, n_snaps+1):
 			autovaloreP=next(GenAutovalori)
@@ -67,12 +64,10 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 				
 				Ucc.Velocita=vel_succ
 				Ucc.Posizione += T_sim*Ucc.Velocita
-				valutazioneP=AB.EvalFunction(Ucc.Posizione[0][0], Ucc.Posizione[1][0])
+				valutazioneP=fEval(Ucc.Posizione[0][0], Ucc.Posizione[1][0])
 
 				if valutazioneP > Ucc.PosizioneMigliore[1]:
 					Ucc.PosizioneMigliore=(Ucc.Posizione.copy(), valutazioneP)
-					
-				statoPSO[[u*2,(u*2)+1]]=Ucc.Posizione
 			
 			for u1 in Uccelli:
 				UccMigliore=max(u1.Vicini, key=lambda uv: uv.PosizioneMigliore[1])
@@ -82,7 +77,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 				del u1.PosizioneMiglioreGlobale
 				u1.PosizioneMiglioreGlobale=UccMigliore.Posizione.copy()
 				
-			yield statoPSO.copy()
+			yield p
 			
 	seme_random=120
 	pScelto=1/2
@@ -90,17 +85,16 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 	deviazioneStd=0.01
 	gen=rnd.default_rng(seme_random) #Random Generator
 	L=n_agenti/(2.0*densita) #Raddoppio perchè lo spazio va da -L a L, dunque in lunghezza 2L
-	AB.EvalFunction=fEval
 	
 	posizioniIniziali=gen.uniform(low=-L, high=L, size=(n_agenti,2))
 	angoliIniziali=gen.uniform(high=2*np.pi, size=(1,n_agenti))
-	orientamentiIniziali=np.array( [np.cos(angoliIniziali[0]),np.sin(angoliIniziali[0])] )
+	orientamentiIniziali=np.array( [np.cos(angoliIniziali[0]),np.sin(angoliIniziali[0])] ).T
 
-	moduliVelocitaIniziali=gen.normal(loc=velocitaMedia, scale=deviazioneStd, size=(1,n_agenti))
-	moduliVelocitaIniziali = np.concatenate((moduliVelocitaIniziali, moduliVelocitaIniziali))
-	velocitaIniziali=(moduliVelocitaIniziali*orientamentiIniziali).T
+	moduliVelocitaIniziali=gen.normal(loc=velocitaMedia, scale=deviazioneStd, size=(n_agenti,1))
+	velocitaIniziali=moduliVelocitaIniziali*orientamentiIniziali
 
-	Uccelli=[AB(posizioniIniziali[i], velocitaIniziali[i]) for i in range(n_agenti)]
+	Uccelli=[AB(p, v) for p,v in zip(posizioniIniziali, velocitaIniziali)]
+	sistema.agenti=Uccelli
 	
 	del posizioniIniziali, angoliIniziali, orientamentiIniziali, moduliVelocitaIniziali, velocitaIniziali
 
@@ -120,7 +114,7 @@ def PSO(n_agenti, densita, velocitaMax, T_sim, c1, c2, betaAttrazione, fEval, D_
 
 		u.Vicini = DizionarioVicini[u]
 
-	InsiemeValutazioni={(u,AB.EvalFunction(u.Posizione[0][0], u.Posizione[1][0])) for u in Uccelli}
+	InsiemeValutazioni={(u,fEval(u.Posizione[0][0], u.Posizione[1][0])) for u in Uccelli}
 	valutazioneMax=max(InsiemeValutazioni, key=lambda coppia: coppia[1])[1]
 	InsiemeMigliori={coppia[0] for coppia in InsiemeValutazioni if coppia[1]==valutazioneMax}
 	AgenteMigliore=InsiemeMigliori.pop()
