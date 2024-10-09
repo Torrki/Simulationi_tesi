@@ -7,6 +7,7 @@ class ArcoGrafo:
 	def __init__(self, N1, N2, c):
 		self.Nodi=(N1, N2)	#L'arco va da N1 a N2
 		self.Costo=c
+		self.LastAnt=None
 		N1.LinkArco(self)
 		N2.LinkArco(self)
 		

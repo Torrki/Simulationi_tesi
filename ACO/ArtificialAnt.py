@@ -7,4 +7,6 @@ class ArtificialAnt:
 		self.Direzione=np.empty((2,1))
 		self.Cibo=False
 		self.Attiva=False
+		self.AntRef=None
+		self.PosPrecRef=None
 		

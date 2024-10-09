@@ -25,6 +25,7 @@ def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, rho: flo
 		FormicheAttive=list()
 		statoACO=np.zeros((n_agenti*2,1))
 		listaStatiFerormoni=list()
+		Guadagni = np.array([ [3,0],[0,3] ])
 
 		for n in Grafo.Nodi:
 			listaArchiNodo=list(n.Archi)
@@ -52,6 +53,13 @@ def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, rho: flo
 				FormicheAttive.append(F0)
 				
 				arco0=Nido.ChoiceArc()
+				F0.AntRef=arco0.LastAnt
+				if(F0.AntRef == None):
+					F0.PosPrecRef=np.zeros((2,1))
+				else:
+					F0.PosPrecRef= F0.AntRef.Posizione.copy()
+
+				arco0.LastAnt=F0
 				F0.Percorso.append(arco0)
 				direzione0=arco0.Nodi[1].Posizione-F0.Posizione
 				direzione0 /= np.linalg.norm(direzione0)
@@ -67,6 +75,10 @@ def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, rho: flo
 							
 						if(arco is not None):
 							f.Percorso.append(arco)
+							arco.LastAnt=f
+							if(lastArc.LastAnt == f): #Non sono arrivate nuove formiche
+								lastArc.LastAnt=None
+
 							CostiFormiche[f] += arco.Costo
 									
 							direzione=arco.Nodi[1].Posizione-f.Posizione
@@ -95,10 +107,20 @@ def ACO(n_agenti: int, T: float, freqSpawn: int, V: float, tau0: float, rho: flo
 							direzione0 /= np.linalg.norm(direzione0)
 							f.Direzione=direzione0
 							CostiFormiche[f]=arco0.Costo
-						
-				dP=T*V*f.Direzione
-				f.Posizione += dP
-				statoACO[[i*2, i*2+1]] += dP
+				
+				if(f.AntRef == None):
+					dP=T*V*f.Direzione
+					f.Posizione += dP
+				else:
+					angolo = np.arctan2(f.Direzione[1][0], f.Direzione[0][0])
+					Rotazione = np.array([ [np.cos(angolo), -np.sin(angolo)],[np.sin(angolo), np.cos(angolo)] ])
+					R_refPrec= f.PosPrecRef + (Rotazione @ np.array([ [-1],[0] ]) )
+					R_ref= f.AntRef.Posizione + (Rotazione @ np.array([ [-1],[0] ]) )
+					f.Posizione = (np.eye(2) - T*Guadagni) @ (f.Posizione - R_refPrec) + R_ref
+					f.PosPrecRef = f.AntRef.Posizione.copy()
+
+				print(f.Posizione)
+				statoACO[[i*2, i*2+1]] = f.Posizione
 				
 			Grafo.Update()
 			
